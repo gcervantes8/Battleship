@@ -122,7 +122,9 @@ public class BoardView extends View {
     /** Draw all the places of the board. */
     private void drawShotPlaces(Canvas canvas) {
         // check the state of each place of the board and draw it.
-
+    if(board == null){
+        return;
+    }
         for(int x = 0; x < boardSize; x++){
             for(int y = 0; y < boardSize; y++){
                 if(board.placeAt(x, y).isHit()){
@@ -135,10 +137,17 @@ public class BoardView extends View {
     public void drawSquare(Canvas canvas, int color, int x, int y){
         boardPaint.setColor(color);
         int length = 98;
-        canvas.drawRect((x*length)+7, (y*length)+7, (length*x)+91, (length*y)+91, boardPaint);
+        //canvas.drawRect((x*length)+7, (y*length)+7, (length*x)+91, (length*y)+91, boardPaint);
+        float viewSize = maxCoord();
+        float tileSize = viewSize / 10;  //10 Is how many tiles there are
+        float offSet = 8;
+        canvas.drawRect((tileSize* x) + offSet, (tileSize*y) + offSet, ((tileSize * x)+tileSize) - offSet, (((viewSize/10) * y)+tileSize) - offSet, boardPaint);
     }
 
     public void drawShipHitPlaces(Canvas canvas){
+        if(board == null){
+            return;
+        }
         List<Place> shipHitPlaces = board.getShipHitPlaces();
         for(Place places : shipHitPlaces){
             drawSquare(canvas, Color.GREEN, places.getX(), places.getY());

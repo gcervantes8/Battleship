@@ -17,7 +17,9 @@ public class MainActivity extends AppCompatActivity{
 
 
     /**The Boardview that will view the board and draw it's current state*/
-    private BoardView boardView;
+    private BoardView playerBoardView;
+
+    private BoardView opponentBoardView;
 
     /**Contains the game model*/
     private GameManager game = new GameManager();
@@ -47,11 +49,20 @@ public class MainActivity extends AppCompatActivity{
         shipsSunkText = (TextView) findViewById(R.id.shipsSunk);
         highscoreText = (TextView) findViewById(R.id.highscoreText);
         resetGame = (Button) findViewById(R.id.resetGame);
+        opponentBoardView = (BoardView) findViewById(R.id.opponentBoardView);
+        playerBoardView = (BoardView) findViewById(R.id.playerBoardView);
+        opponentBoardView.setBoard(game.getOpponentPlayer().getBoard());
+        opponentBoardView.invalidate();
 
-        boardView = (BoardView) findViewById(R.id.boardView);
+        /*opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
+            @Override
+            public void onTouch(int x, int y){
+                boardTouched(x, y);
+            }
+        });*/
 
-        boardView.setBoard(game.getActivePlayer().getBoard());
-        boardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
+        playerBoardView.setBoard(game.getPlayer().getBoard());
+        playerBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
             @Override
             public void onTouch(int x, int y){
                 boardTouched(x, y);
@@ -100,8 +111,8 @@ public class MainActivity extends AppCompatActivity{
         double prevHighscore = game.getHighscore();
         game = new GameManager();
         game.setHighscore(prevHighscore);
-        boardView.setBoard(game.getActivePlayer().getBoard());
-        boardView.invalidate();
+        playerBoardView.setBoard(game.getActivePlayer().getBoard());
+        playerBoardView.invalidate();
         updateShotCount(0);
         updatePlacesHit(0);
         updateShipsSunk(0);
@@ -127,7 +138,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     /**Updates textfield with how much ships have been sunk*/
-    private void updateShipsSunk(int sunk){
+        private void updateShipsSunk(int sunk){
         shipsSunkText.setText("Ships sunk: " + sunk + " / 5");
     }
 
@@ -137,8 +148,8 @@ public class MainActivity extends AppCompatActivity{
     }*/
 
     /**Called when board was touched
-     * @Param x is the x-coordinate of the square that was touched, 0-based index
-     * @Param y is the y-coordinate of the square that was touched, 0-based index*/
+     * @param x is the x-coordinate of the square that was touched, 0-based index
+     * @param y is the y-coordinate of the square that was touched, 0-based index*/
     public void boardTouched(int x, int y) {
 
         resetGame.setText("RESTART");
@@ -148,16 +159,23 @@ public class MainActivity extends AppCompatActivity{
         if(activePlayer.areAllShipsSunk()){
             return;
         }
-        game.hitPlace(x, y);
+        if(!game.hitPlace(x, y)){
+            return;
+        }
 
         int sunkenShips = game.getShipsSunkCount(activePlayer);
         int shotCount = activePlayer.getBoard().numOfShots();
         int shipsHit = game.getShipShots(activePlayer);
+        game.changeTurn();
         updateShotCount(shotCount);
         updatePlacesHit(shipsHit);
         updateShipsSunk(sunkenShips);
 
-        boardView.invalidate();
+
+        game.computerPlay();
+        game.changeTurn();
+        playerBoardView.invalidate();
+        opponentBoardView.invalidate();
 
         //If game was won, then calcuate score and display win dialog
         if(activePlayer.areAllShipsSunk()){

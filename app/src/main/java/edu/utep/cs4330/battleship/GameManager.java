@@ -18,8 +18,7 @@ public class GameManager {
     private Player player;
 
     /**The opponent, could be other human player or npc*/
-    //TODO future implementation will have more than 1 player
-    //private Player opponent;
+    private ComputerPlayer opponent;
 
     /**The highscore for the game, will be a value between 0 and 100 inclusive*/
     private double highscore = 0;
@@ -27,7 +26,7 @@ public class GameManager {
     /**Creates a new game, with players and boards.*/
     public GameManager(){
         player = new Player();
-        //opponent = new Player();
+        opponent = new ComputerPlayer();
         activePlayer = player;
     }
 
@@ -61,25 +60,36 @@ public class GameManager {
         return activePlayer;
     }
 
+    public Player getPlayer(){
+        return player;
+    }
+
+    public Player getOpponentPlayer(){
+        return opponent;
+    }
+
+    public void computerPlay(){
+        Board opponentBoard = opponent.getBoard();
+        opponentBoard.hit(opponent.pickPlace(opponentBoard));
+
+    }
+
     /**Given the x and y coordinates of the board, marks the place as hit
      * @param x is x-coordinate of board, 0-based index
      * @param y is y-coordinate of board, 0-based index
-     * @Return true if place that was hit had a ship*/
+     * @Return true if was a valid place to hit and place was hit*/
     public boolean hitPlace(int x, int y){
         Board board = activePlayer.getBoard();
-        board.hit(board.placeAt(x,y));
-        if(board.placeAt(x,y).hasShip()){
-            return true;
-        }
-        return false;
+        return board.hit(board.placeAt(x,y));
+
     }
 
-     /*public void changeTurn(){
+     public void changeTurn(){
         if(activePlayer == player){
             activePlayer = opponent;
         }
         else{
             activePlayer = player;
         }
-    }*/
+    }
 }

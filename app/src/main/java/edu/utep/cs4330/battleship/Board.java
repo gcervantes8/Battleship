@@ -90,7 +90,10 @@ public class Board{
         return true;
     }
 
-    /**Returns the place in the board with coordinates (x, y)*/
+    /**Returns the place in the board with coordinates (x, y)
+     * @param x x coordinate 0-based index
+     * @param y y coordinate 0-based index
+     * @return place on the board*/
     public Place placeAt(int x, int y){
         if(board == null || isOutOfBounds(x,y) || board[y][x] == null){
             return null;
@@ -108,8 +111,9 @@ public class Board{
         if(!place.isHit()){
             placesShot++;
             place.hit();
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**Returns true if the (x,y) coordinates given are outside the board*/
@@ -152,6 +156,16 @@ public class Board{
         return boardPlaces;
     }
 
+    public boolean isAllHit(){
+        for(int i = 0; i < size(); i++){
+            for(int j = 0; j < size(); j++){
+                if(!board[i][j].isHit()){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
 
 }

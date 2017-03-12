@@ -27,7 +27,7 @@ public class Place {
     }
 
     /**Checks to see if place has been hit
-     * @Return true if place has been hit*/
+     * @return true if place has been hit*/
     public boolean isHit(){
         return isHit;
     }

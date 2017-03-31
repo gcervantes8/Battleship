@@ -1,10 +1,12 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
+
+import java.io.Serializable;
 
 /**
  * Created by ZDeztroyerz on 2/6/2017.
  */
 
-public class Place {
+public class Place implements Serializable {
 
     /**Contains x-coordinate of the place, 0-based index*/
     private int x = 0;
@@ -18,6 +20,7 @@ public class Place {
     /**Place can have 1 ship, if it doesn't have a ship then it is null*/
     private Ship ship = null;
 
+
     /**Initializes place with x and y coordinates
      * @param x is the x-coordinate of place, 0-based index
      * @param y is the y-coordinate of place, 0-based index*/
@@ -27,13 +30,13 @@ public class Place {
     }
 
     /**Checks to see if place has been hit
-     * @Return true if place has been hit*/
-    public boolean isHit(){
+     * @return true if place has been hit*/
+    boolean isHit(){
         return isHit;
     }
 
     /**Marks the place as hit*/
-    public void hit() {
+    void hit() {
         isHit = true;
     }
 
@@ -48,12 +51,29 @@ public class Place {
     }
 
     /**Returns true if place has a ship*/
-    public boolean hasShip() {
+    boolean hasShip() {
         return ship != null;
     }
 
+    /**Checks if place contains the ship
+     * @param shipToCheck is the ship you want to find is in the place*/
+    boolean hasShip(Ship shipToCheck) {
+        return ship == shipToCheck;
+    }
+
+    /**Removes the ship from the place*/
+    void removeShip(){
+        ship = null;
+    }
+
     /**Sets a ship on the place*/
-    public void setShip(Ship ship){
+    protected void setShip(Ship ship){
         this.ship = ship;
     }
+
+    /**Returns the ship that is in the place, null if no ship is in the place*/
+    public Ship getShip(){
+        return ship;
+    }
+
 }

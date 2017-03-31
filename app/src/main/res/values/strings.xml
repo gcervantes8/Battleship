@@ -1,4 +1,28 @@
 <resources>
     <string name="app_name">Battleship</string>
-    <string name="new_button_label">New</string>
+    <string name="new_button_label">New Game</string>
+    <string name="title_activity_place_ships">PlaceShipsActivity</string>
+    <string name="smart_opponent">Smart Opponent</string>
+    <string name="random_opponent">Random Opponent</string>
+    <string name="opponent_select">Select Opponent</string>
+    <string name="reset_game_title">Reset game</string>
+    <string name="reset_game_prompt">Are you sure you want to restart the current game?</string>
+    <string name="new_game">New</string>
+    <string name="place_ships">Place ships</string>
+    <string name="strategy">Random Opponent</string>
+    <string name="enable_sound">Enable Sound</string>
+    <string name="disable_sound">Disable Sound</string>
+    <string name="rotate_ship">Rotate Ship</string>
+
+    <string name="winner_title">Winner!</string>
+    <string name="loser_title">Loser!</string>
+    <string name="winner_description">You have beaten the game by sinking all of the ships! \n\n You sunk all </string>
+    <string name="loser_description">You have lost the game, your opponent sank all your ships before you did.\n\n You sunk </string>
+    <string name="player_turn_status">It is your turn </string>
+    <string name="opponent_turn_status">It it computer\'s turn </string>
+    <string name="win_status">You have won the game! </string>
+    <string name="lose_status">You have lost the game! </string>
+
+
+
 </resources>

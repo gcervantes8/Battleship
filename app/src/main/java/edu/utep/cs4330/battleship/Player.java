@@ -1,5 +1,6 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,17 +10,17 @@ import java.util.Random;
  * Created by Gerardo C on 2/6/2017.
  */
 
-public class Player {
+class Player implements Serializable{
 
 
     /**Each player has 1 board*/
     private Board playerBoard = null;
 
     /**List of ships that the player has*/
-    private List<Ship> fleet = new LinkedList<Ship>();
+    private List<Ship> fleet = new LinkedList<>();
 
     /**Creates board and places ships on the board, location of ships are random*/
-    public Player(){
+    Player(){
         playerBoard = new Board();
 
         placeShipRandomly(playerBoard, new Ship("Minesweeper", 2));
@@ -29,11 +30,16 @@ public class Player {
         placeShipRandomly(playerBoard, new Ship("Aircraft carrier", 5));
     }
 
+    /**Gives the player a new board to use*/
+    Player(Board board){
+        setBoard(board);
+    }
+
     /**Places a given ship onto the board in a random location, location chosen won't already have a ship
      * */
     private Ship placeShipRandomly(Board board, Ship ship){
         Random rng = new Random();
-        boolean dir = rng.nextBoolean(); //direction ship will be placed in
+        boolean dir = rng.nextBoolean();
         // if dir is true then ship will be placed horizontally
 
         int[] maxCoordinates = findMaxLocation(board.size(), ship.getSize(), dir);
@@ -53,7 +59,7 @@ public class Player {
             int x = rng.nextInt(maxX);
             int y = rng.nextInt(maxY);
 
-            /**If was able to place ship on board*/
+            //if was able to place ship on board
             if (board.placeShip(ship, x, y, dir)) {
                 placedShip = true;
             }
@@ -68,7 +74,7 @@ public class Player {
      * square from (0,0) to (maxX,maxY), that square is all the locations where ship can be placed
      * @return integer array containing X and Y coordinates.  Returns null if can't be placed*/
     private int[] findMaxLocation(int boardSize, int shipSize, boolean dir){
-        //int[] maxLocation = new int[2];
+
         int maxX = boardSize;
         int maxY = boardSize;
         if(dir){
@@ -91,8 +97,8 @@ public class Player {
     }
 
     /**Returns all of the places that have a ship and have been hit*/
-    public List<Place> getShipHitPlaces(){
-        List<Place> shipHitPlaces = new LinkedList<Place>();
+    List<Place> getShipHitPlaces(){
+        List<Place> shipHitPlaces = new LinkedList<>();
 
         for(Ship ship : fleet){
             List<Place> shipPlaces = ship.getPlacement();
@@ -107,7 +113,7 @@ public class Player {
     }
 
     /**Returns the amount of ships on the board that have been sunk*/
-    public int shipsSunk(){
+    int shipsSunk(){
         int sunkShips = 0;
 
         for(Ship ship : fleet){
@@ -118,8 +124,38 @@ public class Player {
         return sunkShips;
     }
 
+    /**Gives a reference to a new board to the player*/
+    public void setBoard(Board newBoard){
+        playerBoard = newBoard;
+        updateShipsFromBoard(newBoard);
+    }
+
+    /**Updates the ships field based on a new board given*/
+    private void updateShipsFromBoard(Board board){
+        Place place;
+        for(int i = 0; i < board.size(); i++){
+            for(int j = 0; j < board.size(); j++){
+                place = board.placeAt(i,j);
+                if(place != null && place.hasShip()){
+                    addShip(place.getShip());
+                }
+            }
+        }
+    }
+
+    /**Adds a ship to the player's fleet*/
+    private void addShip(Ship shipToAdd){
+        for(Ship ship: fleet){
+            //If ship we want to add is already in fleet, don't add.  (Acting as set)
+            if(ship == shipToAdd){
+                return;
+            }
+        }
+        fleet.add(shipToAdd);
+    }
+
     /**Returns true if all the ships on the board have been sunk*/
-    public boolean areAllShipsSunk(){
+    boolean areAllShipsSunk(){
         for (Ship ship : fleet) {
             if(!ship.isShipSunk()){
                 return false;

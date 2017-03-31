@@ -1,15 +1,16 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import android.util.Log;
+
+import java.io.Serializable;
 
 /**
  * Created by Gerardo C on 2/6/2017.
  */
 
-public class GameManager {
+public class GameManager implements Serializable{
 
+    //TODO instead of implementing parcelable, can turn into json for cleaner code
 
     /**Player whose turn it is*/
     private Player activePlayer;
@@ -18,68 +19,108 @@ public class GameManager {
     private Player player;
 
     /**The opponent, could be other human player or npc*/
-    //TODO future implementation will have more than 1 player
-    //private Player opponent;
+    private ComputerPlayer opponent;
 
-    /**The highscore for the game, will be a value between 0 and 100 inclusive*/
-    private double highscore = 0;
-
-    /**Creates a new game, with players and boards.*/
-    public GameManager(){
+    /**Creates a new game, players, and boards.*/
+    GameManager(){
         player = new Player();
-        //opponent = new Player();
+        opponent = new ComputerPlayer();
+        activePlayer = player;
+    }
+
+    /**Creates new game and uses the player's board*/
+    GameManager(Board playerBoard){
+        player = new Player(playerBoard);
+
+        opponent = new ComputerPlayer();
         activePlayer = player;
     }
 
     /**Retrieves from given player's board how many ships they have sunk
      * @param player is player's ships you want to check amount of sunk ship*/
-    public int getShipsSunkCount(Player player){
-        return player.shipsSunk();
+    int getShipsSunkCount(Player player){
+        return opponent.shipsSunk();
     }
 
     /**Returns amount of shots that have hit player's ships
      * @param player is the player's ships you want to check*/
     public int getShipShots(Player player){
-        return player.getShipHitPlaces().size();
-    }
-
-    /**Only sets highscore if new score is greater than previous highscore
-     * @param newScore is the score you want to replace the highscore */
-    public void setHighscore(double newScore){
-        if(newScore > highscore){
-            highscore = newScore;
-        }
-    }
-
-    /**Returns the highscore*/
-    public double getHighscore(){
-        return highscore;
+        return opponent.getShipHitPlaces().size();
     }
 
     /**Gets the current active player*/
-    public Player getActivePlayer(){
+    Player getActivePlayer(){
         return activePlayer;
     }
 
-    /**Given the x and y coordinates of the board, marks the place as hit
-     * @param x is x-coordinate of board, 0-based index
-     * @param y is y-coordinate of board, 0-based index
-     * @Return true if place that was hit had a ship*/
-    public boolean hitPlace(int x, int y){
-        Board board = activePlayer.getBoard();
-        board.hit(board.placeAt(x,y));
-        if(board.placeAt(x,y).hasShip()){
-            return true;
+    /**Returns the player that is not active*/
+    private Player getInactivePlayer(){
+        if(activePlayer == player){
+            return opponent;
         }
-        return false;
+        return player;
     }
 
-     /*public void changeTurn(){
+    /**Returns the main player*/
+    Player getPlayer(){
+        return player;
+    }
+
+    /**Returns opponent player*/
+    Player getOpponentPlayer(){
+        return opponent;
+    }
+
+    /**Hits the given place for the computer
+     * @param place you want to the computer to shoot*/
+    void computerPlay(Place place){
+        Board opponentBoard = player.getBoard();
+        boolean hitShip = false;
+        boolean sunkShip = false;
+        if(opponentBoard.hit(place)){
+            if(place.hasShip()){
+
+                hitShip = true;
+                //Then computer sunk a ship
+                if(place.getShip().isShipSunk()){
+                    sunkShip = true;
+                }
+            }
+            opponent.getStrategyInterface().afterHit(hitShip, sunkShip, place.getX(), place.getY());
+            return;
+        }
+        Log.d("", "Computer opponent tried to hit invalid place");
+    }
+
+    /**Returns a place chosen by the computer to place their ship*/
+    Place computerPickPlace(){
+        Board opponentBoard = player.getBoard();
+        return opponent.pickPlace(opponentBoard);
+    }
+
+    /**Used to change what strategy the computer uses to play the game
+     * @param strategyName is the new strategy that will be used by the computer to play the game
+     * StrategyInterface should use the class's official naming of the strategy*/
+    void changeStrategy(String strategyName){
+        opponent.changeStrategy(strategyName);
+    }
+
+    /**Given the x and y coordinates of the board, hits non active player's board
+     * @param x is x-coordinate of board, 0-based index
+     * @param y is y-coordinate of board, 0-based index
+     * @return true if was a valid place to hit and place was hit*/
+    boolean hitPlace(int x, int y){
+        Board board = getInactivePlayer().getBoard();
+        return board.hit(board.placeAt(x,y));
+    }
+
+    /**Changes whose turn it is*/
+     void changeTurn(){
         if(activePlayer == player){
             activePlayer = opponent;
         }
         else{
             activePlayer = player;
         }
-    }*/
+    }
 }

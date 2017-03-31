@@ -1,5 +1,6 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Created by Gerardo C on 2/6/2017.
  */
 
-public class Ship {
+class Ship implements Serializable {
 
     /**The name of the ship*/
     private String name;
@@ -21,25 +22,28 @@ public class Ship {
     /**Is the amount of times the ship has been shot, can be updated by calling updateAmountShot()*/
     private int amountShot = 0;
 
+    /**Shows the direction.  If true then ship is placed horizontal*/
+    private boolean dir = true;
+
     /**List containing the places where ship is placed*/
     private List<Place> placed = new ArrayList<>();
 
     public Ship(int size){
         this.size = size;
-        name = "";
+        name = " ";
     }
-    public Ship(String name, int size){
+    Ship(String name, int size){
         this.name = name;
         this.size = size;
     }
 
     /**Returns size of ship*/
-    public int getSize(){
+    int getSize(){
         return size;
     }
 
     /**Sets the places where ship is on, used to place the ship*/
-    public void placeShip(List<Place> places){
+    void placeShip(List<Place> places){
         placed = places;
     }
 
@@ -59,11 +63,26 @@ public class Ship {
         }
     }
 
+    /**Changes the direction of the ship*/
+    void setDir(boolean newDir){
+        dir = newDir;
+    }
+
+    /**Returns ship's direction*/
+    boolean getDir(){
+        return dir;
+    }
+
+    /**Returns true if ship is placed on a board*/
+    boolean isPlaced(){
+        return !placed.isEmpty();
+    }
+
     /**Returns true if the ship has been sunk*/
-    public boolean isShipSunk(){
+    boolean isShipSunk(){
 
         //If field isSunk is true, then ship is sunk, otherwise check if ship is sunk by checking the places
-        if(isSunk == true){
+        if(isSunk){
             return true;
         }
         //Return false if ship hasn't been placed
@@ -77,8 +96,11 @@ public class Ship {
     }
 
     /**Returns a list of places where ship is placed*/
-    public List<Place> getPlacement(){
+    List<Place> getPlacement(){
         return placed;
     }
 
+    void removeShip(){
+        placed.clear();
+    }
 }

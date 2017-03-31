@@ -1,4 +1,4 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -62,7 +62,7 @@ public class BoardView extends View {
     private Board board;
 
     /** Size of the board. */
-    private int boardSize;
+    private int boardSize = 10;
 
     /** Create a new board view to be run in the given context. */
     public BoardView(Context context) {
@@ -122,7 +122,9 @@ public class BoardView extends View {
     /** Draw all the places of the board. */
     private void drawShotPlaces(Canvas canvas) {
         // check the state of each place of the board and draw it.
-
+    if(board == null){
+        return;
+    }
         for(int x = 0; x < boardSize; x++){
             for(int y = 0; y < boardSize; y++){
                 if(board.placeAt(x, y).isHit()){
@@ -132,13 +134,24 @@ public class BoardView extends View {
         }
     }
 
+    /**Draws a square in the given coordinates
+     * @param color you want the square to be
+     * @param x coordinate of board you want square to be in
+     * @param y coordinate of board you want square to be in*/
     public void drawSquare(Canvas canvas, int color, int x, int y){
         boardPaint.setColor(color);
         int length = 98;
-        canvas.drawRect((x*length)+7, (y*length)+7, (length*x)+91, (length*y)+91, boardPaint);
+        float viewSize = maxCoord();
+        float tileSize = viewSize / 10;  //10 Is how many tiles there are
+        float offSet = 8;
+        canvas.drawRect((tileSize* x) + offSet, (tileSize*y) + offSet, ((tileSize * x)+tileSize) - offSet, (((viewSize/10) * y)+tileSize) - offSet, boardPaint);
     }
 
+    /**Draws a square over all the places that been shot*/
     public void drawShipHitPlaces(Canvas canvas){
+        if(board == null){
+            return;
+        }
         List<Place> shipHitPlaces = board.getShipHitPlaces();
         for(Place places : shipHitPlaces){
             drawSquare(canvas, Color.GREEN, places.getX(), places.getY());
@@ -180,7 +193,7 @@ public class BoardView extends View {
      * don't correspond to any place in the board.
      * The returned coordinates are encoded as <code>x*100 + y</code>.
      */
-    private int locatePlace(float x, float y) {
+    public int locatePlace(float x, float y) {
         if (x <= maxCoord() && y <= maxCoord()) {
             final float placeSize = lineGap();
             int ix = (int) (x / placeSize);

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/placeShipsView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#3C3C3C"
+    tools:context="edu.utep.cs4330.battleship.PlaceShipsActivity">
+
+    <Button
+        android:id="@+id/placeButton"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/placeShipsBoardView"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/placeShipsBoardView"
+        android:layout_marginTop="13dp"
+        android:background="@android:color/holo_green_dark"
+        android:elevation="6dp"
+        android:onClick="segueToPlayActivity"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp"
+        android:paddingTop="5dp"
+        android:text="@string/place_ships"
+        android:textColor="@android:color/background_light" />
+
+    <Button
+        android:id="@+id/rotateShip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/placeButton"
+        android:layout_alignLeft="@+id/placeButton"
+        android:layout_alignRight="@+id/placeButton"
+        android:layout_alignStart="@+id/placeButton"
+        android:layout_below="@+id/placeButton"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/holo_green_dark"
+        android:onClick="rotateShip"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp"
+        android:paddingTop="5dp"
+        android:text="@string/rotate_ship" />
+
+    <edu.utep.cs4330.battleship.BoardView
+        android:id="@+id/placeShipsBoardView"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:layout_weight="0.7" />
+
+    <ImageView
+        android:id="@+id/minesweeperStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/minesweeper2" />
+
+    <ImageView
+        android:id="@+id/frigate"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/minesweeperStatus"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/frigate3" />
+
+    <ImageView
+        android:id="@+id/submarine"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/frigate"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/frigate3" />
+
+    <ImageView
+        android:id="@+id/battleship"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/submarine"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/battleship4" />
+
+    <ImageView
+        android:id="@+id/aircraftcarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/battleship"
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/aircraftcarrier5" />
+
+
+</RelativeLayout>

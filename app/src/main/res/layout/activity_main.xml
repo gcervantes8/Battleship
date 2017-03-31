@@ -4,92 +4,143 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#2B2B2B"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="edu.utep.cs.cs4330.battleship.MainActivity">
+    tools:context="edu.utep.cs4330.battleship.MainActivity">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_weight=".25"
             android:elevation="1dp"
-            android:layout_weight=".3">
+            android:orientation="horizontal">
 
-            <edu.utep.cs.cs4330.battleship.BoardView
-                android:id="@+id/opponentBoardView"
-                android:layout_width="0dp"
-                android:layout_weight=".5"
-                android:layout_height="match_parent" />
             <LinearLayout
-                android:orientation="vertical"
                 android:layout_width="0dp"
-                android:layout_weight=".5"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_weight="0.4"
+                android:orientation="vertical">
+
+                <edu.utep.cs4330.battleship.BoardView
+                    android:id="@+id/playerBoardView"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:layout_weight="0.30" />
+
+                <TextView
+                    android:id="@+id/strategy_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.30"
+                    android:paddingTop="2dp"
+                    android:text="@string/strategy"
+                    android:textColor="@android:color/background_light" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.6"
+                android:orientation="vertical">
 
                 <Button
-                    android:text="@string/new_button_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:id="@+id/resetGame"
-                    android:onClick="resetGame"
                     style="@style/Widget.AppCompat.Button.Colored"
-                    android:theme="@style/AppTheme"
-                    android:background="@android:color/holo_green_dark" />
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0.22"
+                    android:background="@android:color/holo_green_dark"
+                    android:onClick="resetGame"
+                    android:text="@string/new_button_label"
+                    android:theme="@style/AppTheme" />
+
+                <Button
+                    android:id="@+id/opponentSelect"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="0.25"
+                    android:onClick="showOpponentSelectPopup"
+                    android:text="@string/opponent_select" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".11"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/minesweeperStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Minesweeper" />
+
+                    <TextView
+                        android:id="@+id/frigateStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Frigate" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".11"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/submarineStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Submarine" />
+
+                    <TextView
+                        android:id="@+id/battleshipStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Battleship" />
+                </LinearLayout>
 
                 <TextView
-                    android:text="Highscore: 0%"
+                    android:id="@+id/aircraftcarrierStatus"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/highscoreText"
-                    android:layout_marginTop="7dp"
-                    android:textSize="18sp" />
+                    android:layout_height="0dp"
+                    android:layout_weight=".11"
+                    android:text="AircraftCarrier" />
 
                 <TextView
-                    android:text="Ship hits: 0"
+                    android:id="@+id/gameStatus"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="0dp"
-                    android:layout_marginStart="0dp"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/amountHit"
-                    android:textSize="18sp"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true" />
+                    android:layout_height="0dp"
+                    android:layout_weight="0.11"
+                    android:text="@string/player_turn_status"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/background_light" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/shipsSunk"
-                    android:text="Ships sunk: 0 / 5"
-                    android:textSize="18sp"
-                    android:layout_marginTop="5dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Number of Shots: 0"
-                    android:layout_marginTop="5dp"
-                    android:id="@+id/shotCount"
-                    android:fontFamily="sans-serif"
-                    android:textSize="18sp"
-                    android:typeface="normal" />
             </LinearLayout>
         </LinearLayout>
 
-        <edu.utep.cs.cs4330.battleship.BoardView
-            android:id="@+id/playerBoardView"
+        <edu.utep.cs4330.battleship.BoardView
+            android:id="@+id/opponentBoardView"
             android:layout_width="wrap_content"
-            android:layout_weight=".7"
             android:layout_height="0dp"
-            android:layout_marginTop="10dp" />
+            android:layout_marginTop="10dp"
+            android:layout_weight=".65" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,9 +1,9 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Observable;
 
 /**
  * A game board consisting of <code>size</code> * <code>size</code> places
@@ -12,10 +12,10 @@ import java.util.Observable;
  * and y is a row index. A place of the board can be shot at, resulting
  * in either a hit or miss.
  */
-public class Board{
+public class Board implements Serializable {
 
-    //TODO Observable design pattern
-    /**Uses 0-based index*/
+
+    /*Board class uses 0-based index for internal representation*/
 
     /**
      * Size of this board. This board has
@@ -29,9 +29,8 @@ public class Board{
     /**The amount of places that have been shot*/
     private int placesShot = 0;
 
-
+    /**Default constructor makes board size 10*/
     public Board(){
-        //Calls constructor with size 10 board as default to make the board
         this(10);
     }
 
@@ -53,15 +52,18 @@ public class Board{
     }
 
     /**Given the ship, place, and direction*/
-    public boolean placeShip(Ship ship, int x, int y, boolean dir){
+    boolean placeShip(Ship ship, int x, int y, boolean dir){
 
         if(ship == null){
             return false;
         }
-        List<Place> shipPlaces = new ArrayList<Place>();
-        Place place = null;
 
-        /**Goes through all the places where ship will be placed.*/
+        removeShip(ship);
+
+        List<Place> shipPlaces = new ArrayList<Place>();
+        Place place;
+
+        //Goes through places where ship will be placed.*/
         for(int i = 0; i < ship.getSize(); i++){
             //If dir is true, then ship will be placed horizontally, otherwise vertically
             if(dir){
@@ -85,16 +87,29 @@ public class Board{
             placeWithShip.setShip(ship);
         }
 
+        ship.setDir(dir);
         ship.placeShip(shipPlaces);
 
         return true;
+    }
+
+    /**Removes ship from all places in the board*/
+    private void removeShip(Ship ship){
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[0].length; j++){
+                if(board[i][j].hasShip(ship)){
+                    board[i][j].removeShip();
+                }
+            }
+        }
+        ship.removeShip();
     }
 
     /**Returns the place in the board with coordinates (x, y)
      * @param x x coordinate 0-based index
      * @param y y coordinate 0-based index
      * @return place on the board*/
-    public Place placeAt(int x, int y){
+    Place placeAt(int x, int y){
         if(board == null || isOutOfBounds(x,y) || board[y][x] == null){
             return null;
         }
@@ -102,38 +117,40 @@ public class Board{
         return board[y][x];
     }
 
-    /**Hits the given place, returns true if was able to successfully hit the place*/
-    public boolean hit(Place place){
-        if(place == null){
+    /**Hits given place, returns true if was able to successfully hit the
+     * @param placeToHit place you want to hit*/
+    boolean hit(Place placeToHit){
+        if(placeToHit == null){
             return false;
         }
         //If place hasn't been hit before, then hits the place.
-        if(!place.isHit()){
+        if(!placeToHit.isHit()){
             placesShot++;
-            place.hit();
+            placeToHit.hit();
             return true;
         }
         return false;
     }
 
     /**Returns true if the (x,y) coordinates given are outside the board*/
-    private boolean isOutOfBounds(int x, int y){
+    boolean isOutOfBounds(int x, int y){
         if(x >= size() || y >= size() || x < 0 || y < 0){
             return true;
         }
         return false;
     }
 
-    public int numOfShots(){
+    /**Returns the amount of times that the board has been shot*/
+    int numOfShots(){
         return placesShot;
     }
     /** Return the size of this board. */
-    public int size() {
+    int size() {
         return size;
     }
 
     /**Returns all of the places that have a ship and have been hit*/
-    public List<Place> getShipHitPlaces() {
+    List<Place> getShipHitPlaces() {
 
         List<Place> boardPlaces = getPlaces();
         List<Place> shipHitPlaces = new ArrayList<Place>();
@@ -146,6 +163,7 @@ public class Board{
         return shipHitPlaces;
     }
 
+    /**Returns all of the board's places in a LinkedList*/
     private List<Place> getPlaces(){
         List<Place> boardPlaces = new LinkedList<Place>();
         for(int i = 0; i < size(); i++){
@@ -156,7 +174,8 @@ public class Board{
         return boardPlaces;
     }
 
-    public boolean isAllHit(){
+    /**Returns true if all the ships have been hit*/
+    boolean isAllHit(){
         for(int i = 0; i < size(); i++){
             for(int j = 0; j < size(); j++){
                 if(!board[i][j].isHit()){

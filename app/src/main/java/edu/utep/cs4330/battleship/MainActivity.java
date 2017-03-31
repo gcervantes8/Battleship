@@ -1,79 +1,123 @@
-package edu.utep.cs.cs4330.battleship;
+package edu.utep.cs4330.battleship;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import java.io.Serializable;
+
+
+import static java.lang.Thread.sleep;
 
 public class MainActivity extends AppCompatActivity{
 
-    //TODO Seperated View/Model into different packages
-    //TODO Sperate View and controller more
 
-
-    /**The Boardview that will view the board and draw it's current state*/
+    /**The view of the Board, main player's board view (computer)*/
     private BoardView playerBoardView;
 
+    /**The view of the Board, opponent's board view (computer)*/
     private BoardView opponentBoardView;
 
     /**Contains the game model*/
-    private GameManager game = new GameManager();
+    private GameManager game;
 
-    /**Text telling the user how many times they have shot the board*/
-    private TextView shotCountText;
+    /**TextView that says what strategy the computer opponent is using*/
+    private TextView strategyDescription;
 
-    /**Text telling the user how many times they have hit a ship*/
-    private TextView amountHitText;
+    private TextView gameStatus;
 
-    /**Text telling the user how many times they have sunk a ship*/
-    private TextView shipsSunkText;
+    private TextView minesweeperStatus;
+    private TextView frigateStatus;
+    private TextView battleshipStatus;
+    private TextView aircraftcarrierStatus;
+    private TextView submarineStatus;
 
-    /**Text telling the user what their highscore is*/
-    private TextView highscoreText;
+    /**MediaPlayer used to play sound effects for shooting a ship and missing*/
+    private MediaPlayer mp;
 
-    /**Button used to start a new game*/
-    private Button resetGame;
+    /**If sound is disabled then it is false*/
+    private boolean soundEnabled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        shotCountText = (TextView) findViewById(R.id.shotCount);
-        amountHitText = (TextView) findViewById(R.id.amountHit);
-        shipsSunkText = (TextView) findViewById(R.id.shipsSunk);
-        highscoreText = (TextView) findViewById(R.id.highscoreText);
-        resetGame = (Button) findViewById(R.id.resetGame);
+        Intent intent = getIntent();
+
+        //Gets Game Manager from previous activity or makes a new one
+        if(intent == null){
+            game = new GameManager();
+        }
+        else{
+            Bundle oldBundle = intent.getBundleExtra("gameManager");
+            game = (GameManager) oldBundle.getSerializable("gameManager");
+            if(game == null){
+                game = new GameManager();
+            }
+        }
+
+
         opponentBoardView = (BoardView) findViewById(R.id.opponentBoardView);
         playerBoardView = (BoardView) findViewById(R.id.playerBoardView);
-        opponentBoardView.setBoard(game.getOpponentPlayer().getBoard());
-        opponentBoardView.invalidate();
+        strategyDescription = (TextView) findViewById(R.id.strategy_description);
+        gameStatus = (TextView) findViewById(R.id.gameStatus);
+        minesweeperStatus = (TextView) findViewById(R.id.minesweeperStatus);
+        frigateStatus = (TextView) findViewById(R.id.frigateStatus);
+        battleshipStatus = (TextView) findViewById(R.id.battleshipStatus);
+        aircraftcarrierStatus = (TextView) findViewById(R.id.aircraftcarrierStatus);
+        submarineStatus = (TextView) findViewById(R.id.submarineStatus);
 
-        /*opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
-            @Override
-            public void onTouch(int x, int y){
-                boardTouched(x, y);
-            }
-        });*/
+        //Gives board references to the BoardViews
+        setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
+    }
 
-        playerBoardView.setBoard(game.getPlayer().getBoard());
-        playerBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        //Restores Game State for after an orientation happens
+        game = (GameManager) savedInstanceState.getSerializable("game");
+        setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle bundle) {
+        //Saves Game State for before an orientation happens
+        super.onSaveInstanceState(bundle);
+        bundle.putSerializable("game", (Serializable) game);
+    }
+
+    /**Gives a Board references to the BoardViews*/
+    private void setNewBoards(BoardView playerBoardView, BoardView opponentBoardView, Board playerBoard, Board opponentBoard){
+
+        playerBoardView.setBoard(playerBoard);
+        opponentBoardView.setBoard(opponentBoard);
+
+        opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
             @Override
             public void onTouch(int x, int y){
                 boardTouched(x, y);
             }
         });
+
+        playerBoardView.invalidate();
+        opponentBoardView.invalidate();
     }
 
     /**Resets game when button was tapped*/
     public void resetGame(View view){
 
-        /**If no moves have been made on the game or game is over, then reset game without asking user*/
+        //Doesn't ask user to reset the game if game is over or no shots have been made to the board
         if(game.getActivePlayer().getBoard().numOfShots() == 0  || game.getActivePlayer().areAllShipsSunk()){
             resetGame();
             return;
@@ -81,19 +125,16 @@ public class MainActivity extends AppCompatActivity{
         resetPromptDialog();
     }
 
-    /**AlertDialog is used to display a dialog asking the user if they want to reset the game
-     * resets the game if user taps on Yes button*/
+    /**AlertDialog is used to display a dialog, the dialog asks the user if they want to reset the game.
+     * Game is reset if user taps on yes*/
     public void resetPromptDialog(){
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-
-        alertDialog.setTitle("Reset game");
-
-        alertDialog.setMessage("Are you sure you want to restart the current game?");
+        alertDialog.setTitle(getString(R.string.reset_game_title));
+        alertDialog.setMessage(getString(R.string.reset_game_prompt));
 
         //Yes button, and listener for if button is pressed
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-
                 resetGame();
             }
         });
@@ -108,92 +149,194 @@ public class MainActivity extends AppCompatActivity{
 
     /**Resets game*/
     public void resetGame(){
-        double prevHighscore = game.getHighscore();
         game = new GameManager();
-        game.setHighscore(prevHighscore);
-        playerBoardView.setBoard(game.getActivePlayer().getBoard());
-        playerBoardView.invalidate();
-        updateShotCount(0);
-        updatePlacesHit(0);
-        updateShipsSunk(0);
-        updateHighscore(game.getHighscore());
-        resetGame.setText("START");
+        minesweeperStatus.setPaintFlags(minesweeperStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        frigateStatus.setPaintFlags(frigateStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        battleshipStatus.setPaintFlags(battleshipStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        aircraftcarrierStatus.setPaintFlags(aircraftcarrierStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        submarineStatus.setPaintFlags(submarineStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        nextShip = false;
+        if(strategyDescription.getText().equals(getString(R.string.random_opponent))){
+            game.changeStrategy(RandomStrategy.strategyName);
+        }
+        else{
+            game.changeStrategy(SmartStrategy.strategyName);
+        }
+
+        setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
     }
 
-    /**Updates textfield with new value of how many times the player has shot the board
-     * @param shotCount is how many times a player has shot board*/
-    private void updateShotCount(int shotCount){
-        shotCountText.setText("Number of Shots: " + shotCount);
-    }
+    /**Plays sound of the resource id
+     * @param soundResourceId that will be played, should be in res/raw/ folder*/
+    public void playSound(int soundResourceId){
+        if(!soundEnabled){
+           return;
+        }
+        if (mp != null) {
+            mp.stop();
+            mp.reset();
+            mp.release();
+            mp = null;
+        }
 
-    /**Updates textfield with amount of ship hits*/
-    private void updatePlacesHit(int placesHit){
-        amountHitText.setText("Ship hits: " + placesHit);
-    }
-
-    /**Updates textfield with amount of ship hits*/
-    private void updateHighscore(double score){
-        int roundedScore = (int) score;
-        highscoreText.setText("Highscore: " + roundedScore + "%");
-    }
-
-    /**Updates textfield with how much ships have been sunk*/
-        private void updateShipsSunk(int sunk){
-        shipsSunkText.setText("Ships sunk: " + sunk + " / 5");
-    }
-
-    /*public void playSound(){
-        MediaPlayer mp = MediaPlayer.create(MainActivity.this, R.raw.miss);
+        mp = MediaPlayer.create(this, soundResourceId);
         mp.start();
-    }*/
+    }
 
     /**Called when board was touched
      * @param x is the x-coordinate of the square that was touched, 0-based index
      * @param y is the y-coordinate of the square that was touched, 0-based index*/
     public void boardTouched(int x, int y) {
 
-        resetGame.setText("RESTART");
-        Player activePlayer = game.getActivePlayer();
+        Place placeToHit = game.getOpponentPlayer().getBoard().placeAt(x, y);
+
+        boolean isGameOver = game.getPlayer().areAllShipsSunk();
+        boolean computersTurn = game.getActivePlayer() != game.getPlayer();
+        boolean placeAlreadyHit = placeToHit.isHit();
 
         //If all ships are sunk, then game is over, do nothing if button click
-        if(activePlayer.areAllShipsSunk()){
-            return;
-        }
-        if(!game.hitPlace(x, y)){
+        if(isGameOver || computersTurn || placeAlreadyHit){
             return;
         }
 
-        int sunkenShips = game.getShipsSunkCount(activePlayer);
-        int shotCount = activePlayer.getBoard().numOfShots();
-        int shipsHit = game.getShipShots(activePlayer);
-        game.changeTurn();
-        updateShotCount(shotCount);
-        updatePlacesHit(shipsHit);
-        updateShipsSunk(sunkenShips);
+        game.hitPlace(x, y);
 
 
-        game.computerPlay();
-        game.changeTurn();
-        playerBoardView.invalidate();
+        //If place had a ship
+        if(placeToHit.hasShip()){
+            playSound(R.raw.shiphit);
+        }
+        //Player keeps turn if they hit a ship
+        else{
+            game.changeTurn();
+            gameStatus.setText(getString(R.string.opponent_turn_status));
+            playSound(R.raw.miss);
+        }
+
         opponentBoardView.invalidate();
 
-        //If game was won, then calcuate score and display win dialog
-        if(activePlayer.areAllShipsSunk()){
-            double score = (double)shipsHit / shotCount;
-            score *= 100;
+        boolean playerWon = game.getOpponentPlayer().areAllShipsSunk();
+        if(playerWon){
+            gameStatus.setText(getString(R.string.win_status));
+            resultsDialog(true, game.getShipsSunkCount(game.getPlayer()) );
+            return;
+        }
 
-            game.setHighscore(score);
-            updateHighscore(game.getHighscore());
-            winDialog(score, shipsHit, shotCount);
+        boolean isComputersTurn = game.getActivePlayer() != game.getPlayer();
+        if(isComputersTurn){
+            computerTurn();
         }
 
     }
 
+    /**Takes care of computer shooting the board.
+     * Shoots board, checks if ship was hit or sunk.*/
+    public void computerTurn(){
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Place placeToHit = game.computerPickPlace();
+                        sleep(450);  //Prevents computer from placing immediately after player places
+
+                        game.computerPlay(placeToHit);
+
+                        boolean hitShip = placeToHit.hasShip();
+
+
+                        if (hitShip) {
+                            playSound(R.raw.shiphit);
+
+                            boolean sunkShip = placeToHit.getShip().isShipSunk();
+                            if (sunkShip) {
+                                final TextView shipStatus = findShip(placeToHit.getShip().getSize());
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        shipStatus.setPaintFlags(shipStatus.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                                    }
+                                });
+                            }
+                        }
+                        else{
+                            game.changeTurn();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    gameStatus.setText(getString(R.string.player_turn_status));
+                                }
+                            });
+                            playSound(R.raw.miss);
+                        }
+                        final boolean computerWon = game.getPlayer().areAllShipsSunk();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                playerBoardView.invalidate();
+                                if(computerWon){
+                                    gameStatus.setText(getString(R.string.lose_status));
+                                    resultsDialog(false,  game.getShipsSunkCount(game.getPlayer()) );
+                                }
+                            }
+                        });
+
+                        if(computerWon){
+                            return;
+                        }
+                        sleep(250); //Prevents player from place immediately after the computer places
+
+                        if(placeToHit.hasShip()){
+                            computerTurn();
+                        }
+                    }
+                    catch(InterruptedException e){
+                        Log.d("", "Exception thrown in computerTurn() method in MainActivity");
+                        computerTurn();
+                    }
+                }
+            });
+
+            thread.start();
+    }
+
+    /**Shows pop-up so that user can select their opponent*/
+    public void showOpponentSelectPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.opponent_selection, popup.getMenu());
+        popup.show();
+
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+            public boolean onMenuItemClick(MenuItem item){
+                String newStrategyName = null;
+                String newStrategyDescription = "";
+                switch (item.getItemId()){
+                    case R.id.smart_opponent: newStrategyName = SmartStrategy.strategyName; newStrategyDescription = getString(R.string.smart_opponent); break;
+                    case R.id.random_opponent: newStrategyName = RandomStrategy.strategyName;  newStrategyDescription = getString(R.string.random_opponent); break;
+                    default: break;
+                }
+                game.changeStrategy(newStrategyName);
+                strategyDescription.setText(newStrategyDescription);
+                return true;
+            }
+        });
+    }
+
     /**Uses AlertDialog display a winning dialog after the player has won the game*/
-    private void winDialog(double score, int shipsHit, int shotCount){
+    private void resultsDialog(boolean winner, int shipsSunk){
         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle("Winner!");
-        alertDialog.setMessage("You have beaten the game by sinking all of the ships! \n\nYour score this game was " + (int) score + "%\n" + shipsHit + " successful shots, " + shotCount + " total shots");
+        String title, description;
+        if(winner){
+            title = getString(R.string.winner_title);
+            description = getString(R.string.winner_description) + " " + shipsSunk + " ships";
+        }
+        else{
+            title = getString(R.string.loser_title);
+            description = getString(R.string.loser_description) + " " + shipsSunk + " ships";
+        }
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(description);
 
         //Ok button
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
@@ -202,5 +345,52 @@ public class MainActivity extends AppCompatActivity{
         });
 
         alertDialog.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.option_bar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            //Sound is a toggle for when to disable and enable
+            case R.id.sound:
+                soundEnabled = !soundEnabled;
+                if(soundEnabled){
+                    item.setTitle(getString(R.string.disable_sound));
+                }
+                else{
+                    item.setTitle(getString(R.string.enable_sound));
+                }
+                return true;
+            case R.id.place_ships:
+                Intent i = new Intent(this, PlaceShipsActivity.class);
+                startActivity(i);
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private boolean nextShip = false;
+
+    private TextView findShip(int size){
+        TextView shipText = null;
+        switch(size){
+            case 2: shipText = minesweeperStatus; break;
+            case 3: shipText = frigateStatus; nextShip = true; break;
+            case 4: shipText = battleshipStatus; break;
+            case 5: shipText = aircraftcarrierStatus; break;
+        }
+
+        if(shipText == frigateStatus && nextShip){
+            shipText = submarineStatus;
+        }
+
+        return shipText;
     }
 }

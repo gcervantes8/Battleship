@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- menu group -->
+    <group android:id="@+id/group_strategies">
+        <item android:id="@+id/random_opponent"
+            android:title="@string/random_opponent" />
+        <item android:id="@+id/smart_opponent"
+            android:title="@string/smart_opponent" />
+    </group>
+</menu>

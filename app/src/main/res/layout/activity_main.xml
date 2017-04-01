@@ -74,55 +74,6 @@
                     android:onClick="showOpponentSelectPopup"
                     android:text="@string/opponent_select" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".11"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/minesweeperStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Minesweeper" />
-
-                    <TextView
-                        android:id="@+id/frigateStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Frigate" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".11"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/submarineStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Submarine" />
-
-                    <TextView
-                        android:id="@+id/battleshipStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Battleship" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/aircraftcarrierStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight=".11"
-                    android:text="AircraftCarrier" />
-
                 <TextView
                     android:id="@+id/gameStatus"
                     android:layout_width="match_parent"

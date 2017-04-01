@@ -100,6 +100,7 @@ class Ship implements Serializable {
         return placed;
     }
 
+    //TODO places should also remove the ship?
     void removeShip(){
         placed.clear();
     }

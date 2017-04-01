@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -24,21 +25,20 @@ import java.util.List;
 
 public class PlaceShipsActivity extends AppCompatActivity {
 
-    BoardView boardView;
-    Board board;
+    /**The board that will be displayed so user can place ships*/
+    private BoardView boardView;
 
-    ShipView shipBeingDragged = null;
+    /**The board where ships will be placed*/
+    private Board board;
 
-    ShipView minesweeper;
-    ShipView frigate;
-    ShipView battleship;
-    ShipView aircraftcarrier;
-    ShipView submarine;
+    /**The ship that is being dragged, null if no ship is being dragged*/
+    private ShipView shipBeingDragged = null;
 
-
+    /**Fleet of shipViews for every ship that can be added*/
     private List<ShipView> fleetView = new LinkedList<>();
 
-    Button placeButton;
+    /**Place button, which is disabled if not doing placing ships*/
+    private Button placeButton;
 
 
     @Override
@@ -47,25 +47,17 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         RelativeLayout layout = (RelativeLayout) getLayoutInflater().inflate(R.layout.content_place_ships, null);
         setContentView(layout);
-        //setContentView(R.layout.activity_place_ships);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        /*fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+
         boardView = (BoardView) findViewById(R.id.placeShipsBoardView);
         board = new Board();
         boardView.setBoard(board);
 
         placeButton = (Button) findViewById(R.id.placeButton);
-        placeButton.setBackgroundColor(Color.rgb(75,120,30));
-        placeButton.setTextColor(Color.rgb(115,115,115));
-        placeButton.setEnabled(false);
+        enablePlaceButton(false);
 
 
         ImageView minesweeper = (ImageView) findViewById(R.id.minesweeperStatus);
@@ -75,24 +67,12 @@ public class PlaceShipsActivity extends AppCompatActivity {
         ImageView aircraftcarrier = (ImageView) findViewById(R.id.aircraftcarrier);
 
 
-
-        /*minesweeperShip = new Ship("minesweeper", 2);
-        frigateShip = new Ship("frigate", 3);
-        submarineShip = new Ship("submarine", 3);
-        battleshipShip  = new Ship("battleship" , 4);
-        aircraftcarrierShip = new Ship("aircraftcarrier", 5);*/
-
         fleetView.add(new ShipView(minesweeper, new Ship("minesweeper", 2)));
         fleetView.add(new ShipView(frigate, new Ship("frigate", 3)));
         fleetView.add(new ShipView(submarine, new Ship("submarine", 3)));
         fleetView.add(new ShipView(battleship, new Ship("battleship", 4)));
         fleetView.add(new ShipView(aircraftcarrier, new Ship("aircraftcarrier", 5)));
 
-        /*setShipImage(minesweeper);
-        setShipImage(frigate);
-        setShipImage(submarine);
-        setShipImage(battleship);
-        setShipImage(aircraftcarrier);*/
         for(ShipView shipView: fleetView){
             setShipImage(shipView);
         }
@@ -104,7 +84,8 @@ public class PlaceShipsActivity extends AppCompatActivity {
         boardView.invalidate();
     }
 
-
+    /**Sets drag listener for the board, snaps the object being dragged onto the board.
+     * Ship is also placed on the board*/
     public void setBoardDragListener(final BoardView boardView, final Board board){
         boardView.setOnDragListener(new View.OnDragListener() {
             @Override
@@ -127,7 +108,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
                         break;
 
                     case DragEvent.ACTION_DROP:
-                        shipBeingDragged.getShipImage().setVisibility(View.VISIBLE);
 
 
                         float x = event.getX();
@@ -171,12 +151,10 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
 
                         if(allShipsPlaced()){
-                            placeButton.setEnabled(true);
-                            placeButton.setTextColor(Color.WHITE);
-                            placeButton.setBackgroundColor(Color.rgb(102,153,0));
+                            enablePlaceButton(true);
                         }
-
                         break;
+
                     default: break;
                 }
                 return true;
@@ -184,16 +162,21 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
+    /**Returns true if all ships have been placed*/
     public boolean allShipsPlaced(){
         for(ShipView ship: fleetView){
+            if(ship.getShip() == null){
+                return false;
+            }
+
           if(!ship.getShip().isPlaced()){
               return false;
           }
         }
         return true;
-        //return minesweeperShip.isPlaced() && frigateShip.isPlaced() && battleshipShip.isPlaced() && aircraftcarrierShip.isPlaced();
     }
 
+    /**Segues to the play activity, gives information to play activity*/
     public void segueToPlayActivity(View view){
         Intent i = new Intent(this, MainActivity.class);
 
@@ -205,17 +188,13 @@ public class PlaceShipsActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    private void selectImage(ImageView image){
-        image.setBackgroundColor(Color.GREEN);
-        image.setSelected(true);
-    }
-
+    /**Correctly scales the image and gives it a touch listener*/
     private void setShipImage(final ShipView shipView){
         setImageScaling(shipView.getShipImage());
         setTouchListener(shipView);
     }
 
-
+    /**Gives a touch listener to the image for dragging*/
     private void setTouchListener(final ShipView shipView){
         final ImageView image = shipView.getShipImage();
         image.setOnTouchListener(new View.OnTouchListener() {
@@ -253,7 +232,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
                     };
 
                     image.startDrag(data, shadowBuilder, image, 0);
-                    image.setVisibility(View.VISIBLE);
+                    //image.setVisibility(View.INVISIBLE);
                     shipBeingDragged = shipView;
                     deselectAllShipViews();
                     select(shipView);
@@ -267,28 +246,73 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
-    public void rotateShip(View v){
-        for(ShipView shipView: fleetView){
-            if(shipView.isSelected()){
-                if(shipView.getShip().getDir() == true){
-                    shipView.getShipImage().setRotation(90);
-                    shipView.getShip().setDir(false);
-                }
-                else{
-                    shipView.getShipImage().setRotation(0);
-                    shipView.getShip().setDir(true);
-                }
+    /**Rotates the ship and then places the ship in the middle of the screen*/
+    public void rotateButtonTapped(View v){
+        ShipView shipToRotate = findSelectedShip();
+        rotateShip(shipToRotate);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        shipToRotate.getShipImage().setX(width/3+10);
+        shipToRotate.getShipImage().setY((height/4)-20);
+
+        enablePlaceButton(false);
+
+        if(shipToRotate.getShip() != null) {
+            for (Place place : shipToRotate.getShip().getPlacement()) {
+                place.setShip(null);
             }
-            shipView.getShipImage().setOnTouchListener(null);
-            setTouchListener(shipView); //Creates new touch listener to update the shadow builder
+            shipToRotate.getShip().removeShip();
+        }
+
+        shipToRotate.getShipImage().setOnTouchListener(null);
+        setTouchListener(shipToRotate); //Creates new touch listener to update the shadow builder
+    }
+
+    private void enablePlaceButton(Boolean enable){
+        if(enable){
+            placeButton.setEnabled(true);
+            placeButton.setTextColor(Color.WHITE);
+            placeButton.setBackgroundColor(Color.rgb(102,153,0));
+        }
+        else{
+            placeButton.setBackgroundColor(Color.rgb(75,120,30));
+            placeButton.setTextColor(Color.rgb(115,115,115));
+            placeButton.setEnabled(false);
         }
     }
 
+    /**Finds the ship that has a selected image*/
+    private ShipView findSelectedShip(){
+        for(ShipView shipView: fleetView){
+            if(shipView.isSelected()){
+                return shipView;
+            }
+        }
+        return null;
+    }
+
+    /**Rotates the ship*/
+    private void rotateShip(ShipView shipToRotate){
+        if(shipToRotate.getShip().getDir()){
+            shipToRotate.getShipImage().setRotation(90);
+            shipToRotate.getShip().setDir(false);
+        }
+        else{
+            shipToRotate.getShipImage().setRotation(0);
+            shipToRotate.getShip().setDir(true);
+        }
+    }
+
+    /**Selects the image, image needs to be selected for rotation*/
     public void select(ShipView shipView){
         shipView.setSelected(true);
         shipView.getShipImage().setBackgroundColor(Color.GREEN);
     }
 
+    /**Deselects all of the images*/
     public void deselectAllShipViews(){
         for(ShipView shipView: fleetView){
             shipView.setSelected(false);
@@ -296,7 +320,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         }
     }
 
-
+    /**Scales the image to have the same height as a tile on the boardView*/
     private void setImageScaling(final ImageView image){
 
         image.setAdjustViewBounds(true);
@@ -312,5 +336,4 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         });
     }
-
 }

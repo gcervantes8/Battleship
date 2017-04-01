@@ -35,13 +35,8 @@ public class MainActivity extends AppCompatActivity{
     /**TextView that says what strategy the computer opponent is using*/
     private TextView strategyDescription;
 
+    /**Shows the status of the game, whose turn it is or if someone has won*/
     private TextView gameStatus;
-
-    private TextView minesweeperStatus;
-    private TextView frigateStatus;
-    private TextView battleshipStatus;
-    private TextView aircraftcarrierStatus;
-    private TextView submarineStatus;
 
     /**MediaPlayer used to play sound effects for shooting a ship and missing*/
     private MediaPlayer mp;
@@ -73,11 +68,6 @@ public class MainActivity extends AppCompatActivity{
         playerBoardView = (BoardView) findViewById(R.id.playerBoardView);
         strategyDescription = (TextView) findViewById(R.id.strategy_description);
         gameStatus = (TextView) findViewById(R.id.gameStatus);
-        minesweeperStatus = (TextView) findViewById(R.id.minesweeperStatus);
-        frigateStatus = (TextView) findViewById(R.id.frigateStatus);
-        battleshipStatus = (TextView) findViewById(R.id.battleshipStatus);
-        aircraftcarrierStatus = (TextView) findViewById(R.id.aircraftcarrierStatus);
-        submarineStatus = (TextView) findViewById(R.id.submarineStatus);
 
         //Gives board references to the BoardViews
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
@@ -150,12 +140,6 @@ public class MainActivity extends AppCompatActivity{
     /**Resets game*/
     public void resetGame(){
         game = new GameManager();
-        minesweeperStatus.setPaintFlags(minesweeperStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        frigateStatus.setPaintFlags(frigateStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        battleshipStatus.setPaintFlags(battleshipStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        aircraftcarrierStatus.setPaintFlags(aircraftcarrierStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        submarineStatus.setPaintFlags(submarineStatus.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        nextShip = false;
         if(strategyDescription.getText().equals(getString(R.string.random_opponent))){
             game.changeStrategy(RandomStrategy.strategyName);
         }
@@ -250,13 +234,7 @@ public class MainActivity extends AppCompatActivity{
 
                             boolean sunkShip = placeToHit.getShip().isShipSunk();
                             if (sunkShip) {
-                                final TextView shipStatus = findShip(placeToHit.getShip().getSize());
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        shipStatus.setPaintFlags(shipStatus.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                                    }
-                                });
+
                             }
                         }
                         else{
@@ -374,23 +352,5 @@ public class MainActivity extends AppCompatActivity{
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private boolean nextShip = false;
-
-    private TextView findShip(int size){
-        TextView shipText = null;
-        switch(size){
-            case 2: shipText = minesweeperStatus; break;
-            case 3: shipText = frigateStatus; nextShip = true; break;
-            case 4: shipText = battleshipStatus; break;
-            case 5: shipText = aircraftcarrierStatus; break;
-        }
-
-        if(shipText == frigateStatus && nextShip){
-            shipText = submarineStatus;
-        }
-
-        return shipText;
     }
 }

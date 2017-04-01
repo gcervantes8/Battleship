@@ -41,7 +41,7 @@
         android:layout_below="@+id/placeButton"
         android:layout_marginTop="5dp"
         android:background="@android:color/holo_green_dark"
-        android:onClick="rotateShip"
+        android:onClick="rotateButtonTapped"
         android:paddingBottom="5dp"
         android:paddingEnd="5dp"
         android:paddingLeft="5dp"

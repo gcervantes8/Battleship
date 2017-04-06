@@ -22,7 +22,7 @@
     <string name="opponent_turn_status">It it computer\'s turn </string>
     <string name="win_status">You have won the game! </string>
     <string name="lose_status">You have lost the game! </string>
-
+    <string name="title_activity_connection">ConnectionActivity</string>
 
 
 </resources>

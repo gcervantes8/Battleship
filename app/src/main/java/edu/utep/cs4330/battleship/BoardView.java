@@ -58,6 +58,9 @@ public class BoardView extends View {
         boardLinePaint.setStrokeWidth(2);
     }
 
+    /**Displays ships that are on the board if true*/
+    private boolean displayShips = false;
+
     /** Board to be displayed by this view. */
     private Board board;
 
@@ -116,9 +119,24 @@ public class BoardView extends View {
         super.onDraw(canvas);
         drawGrid(canvas);
         drawShotPlaces(canvas);
+        if(displayShips){
+            drawShips(canvas);
+        }
         drawShipHitPlaces(canvas);
+
     }
 
+    /**Draws ships that are on the board if displayShips variable is true*/
+    private void drawShips(Canvas canvas){
+
+        for(int x = 0; x < boardSize; x++){
+            for(int y = 0; y < boardSize; y++){
+                if(board.placeAt(x, y).hasShip()){
+                    drawSquare(canvas, Color.argb(215, 255,255,255), x, y);
+                }
+            }
+        }
+    }
     /** Draw all the places of the board. */
     private void drawShotPlaces(Canvas canvas) {
         // check the state of each place of the board and draw it.
@@ -220,5 +238,9 @@ public class BoardView extends View {
         for (BoardTouchListener listener: listeners) {
             listener.onTouch(x, y);
         }
+    }
+
+    public void displayBoardsShips(boolean display){
+        displayShips = display;
     }
 }

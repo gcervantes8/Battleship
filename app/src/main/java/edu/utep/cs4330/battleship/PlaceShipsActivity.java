@@ -48,13 +48,14 @@ public class PlaceShipsActivity extends AppCompatActivity {
         RelativeLayout layout = (RelativeLayout) getLayoutInflater().inflate(R.layout.content_place_ships, null);
         setContentView(layout);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);*/
 
         boardView = (BoardView) findViewById(R.id.placeShipsBoardView);
         board = new Board();
         boardView.setBoard(board);
+        boardView.displayBoardsShips(true);
 
         placeButton = (Button) findViewById(R.id.placeButton);
         enablePlaceButton(false);
@@ -149,7 +150,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
                         }
 
 
-
+                        boardView.invalidate();
                         if(allShipsPlaced()){
                             enablePlaceButton(true);
                         }
@@ -269,6 +270,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         shipToRotate.getShipImage().setOnTouchListener(null);
         setTouchListener(shipToRotate); //Creates new touch listener to update the shadow builder
+        boardView.invalidate();
     }
 
     private void enablePlaceButton(Boolean enable){

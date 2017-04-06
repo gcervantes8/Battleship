@@ -93,6 +93,8 @@ public class MainActivity extends AppCompatActivity{
         playerBoardView.setBoard(playerBoard);
         opponentBoardView.setBoard(opponentBoard);
 
+        playerBoardView.displayBoardsShips(true);
+
         opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
             @Override
             public void onTouch(int x, int y){

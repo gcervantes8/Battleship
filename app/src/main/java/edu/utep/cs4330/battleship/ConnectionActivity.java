@@ -4,28 +4,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.util.ArraySet;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
-import static android.os.Looper.getMainLooper;
 
 public class ConnectionActivity extends AppCompatActivity implements WifiP2pManager.PeerListListener{
 
@@ -41,11 +35,17 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
     private Spinner deviceSpinner;
 
     /**Contains spinner information*/
-    private ArrayAdapter<String> spinnerAdapter;
+    private ArrayAdapter<WifiP2pDevice> deviceAdapter;
 
+    /**Receives broadcasts*/
     private BroadcastReceiver receiver;
 
-    private final String NO_DEVICES_FOUND = "No devices found";
+    private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice(){
+        @Override
+        public String toString(){
+            return "No devices found";
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +60,11 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
-        List<String> items = new LinkedList<>();
+        List<WifiP2pDevice> items = new LinkedList<>();
         items.add(NO_DEVICES_FOUND);
-        spinnerAdapter = new ArrayAdapter<>(this, R.layout.spinner, R.id.list, items);
+        deviceAdapter = new ArrayAdapter<>(this, R.layout.spinner, R.id.list, items);
 
-        deviceSpinner.setAdapter(spinnerAdapter);
-
+        deviceSpinner.setAdapter(deviceAdapter);
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -138,6 +137,57 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         registerReceiver(receiver, intentFilter);
     }
 
+    public void connect(View view){
+        final ConnectionActivity activity = this;
+        Thread connect = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                WifiP2pDevice deviceSelected = (WifiP2pDevice) deviceSpinner.getSelectedItem();
+
+                if(deviceSelected == NO_DEVICES_FOUND){
+                    /*Toast.makeText(this, "No proper device selected.",
+                    Toast.LENGTH_SHORT).show();*/
+                    runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(activity, "No proper device selected.",
+                                Toast.LENGTH_SHORT).show();
+                     }
+                     });
+                return;
+                }
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = deviceSelected.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+
+
+                mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+
+
+                    @Override
+                    public void onSuccess() {
+                      // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(activity, "Connect failed. Retry.",
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                         });
+                    }
+                });
+
+            }
+        });
+        connect.start();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -149,20 +199,16 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         Collection<WifiP2pDevice> refreshedPeers = peerList.getDeviceList();
         Log.d("wifiMe", "Found a change in the device list");
 
-        //((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged(); //TODO
-
         if (refreshedPeers.isEmpty()) {
-            spinnerAdapter.clear();
-            spinnerAdapter.add(NO_DEVICES_FOUND);
+            deviceAdapter.clear();
+            deviceAdapter.add(NO_DEVICES_FOUND);
         } else {
-            spinnerAdapter.clear();
+            deviceAdapter.clear();
             for (WifiP2pDevice device : peerList.getDeviceList()) {
-                spinnerAdapter.add(device.deviceName);
+                deviceAdapter.add(device);
             }
         }
         Log.d("wifiMe", "Devices updates");
-        spinnerAdapter.notifyDataSetChanged();
-        //deviceSpinner.setAdapter(spinnerAdapter);
-
+        deviceAdapter.notifyDataSetChanged();
     }
 }

@@ -14,17 +14,12 @@
         android:id="@+id/Connect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="connect"
         android:text="Connect" />
 
     <Spinner
         android:id="@+id/DeviceSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/refreshDevices"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Refresh Device List" />
 
 </LinearLayout>

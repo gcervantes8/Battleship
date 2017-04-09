@@ -138,9 +138,6 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     .findFragmentById(R.id.frag_list);
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));*/
-                    if (mManager != null) {
-                        mManager.requestPeers(mChannel, activity);
-                    }
                 }
             }
         };
@@ -231,7 +228,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
     }
 
     public void refresh(View view){
-
+        
         mManager.requestPeers(mChannel, this);
         toast("Refreshed!");
     }

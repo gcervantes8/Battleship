@@ -1,7 +1,9 @@
 package edu.utep.cs4330.battleship;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WpsInfo;
@@ -10,10 +12,12 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -40,6 +44,9 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
     /**Receives broadcasts*/
     private BroadcastReceiver receiver;
 
+    private Button turnon;
+
+
     private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice(){
         @Override
         public String toString(){
@@ -52,6 +59,8 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connection);
         deviceSpinner = (Spinner) findViewById(R.id.DeviceSpinner);
+        turnon = (Button) findViewById(R.id.Turnon);
+
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
@@ -65,6 +74,14 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         deviceAdapter = new ArrayAdapter<>(this, R.layout.spinner, R.id.list, items);
 
         deviceSpinner.setAdapter(deviceAdapter);
+
+        turnon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            }
+        });
+
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -96,8 +113,11 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
                     if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
                         activity.setIsWifiP2pEnabled(true);
+                        turnon.setEnabled(false);
                     } else {
                         activity.setIsWifiP2pEnabled(false);
+                        shootAlert("Go to settings to enable wifi-direct?");
+                        turnon.setEnabled(true);
                     }
                 } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 
@@ -118,6 +138,9 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     .findFragmentById(R.id.frag_list);
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));*/
+                    if (mManager != null) {
+                        mManager.requestPeers(mChannel, activity);
+                    }
                 }
             }
         };
@@ -152,7 +175,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(activity, "No proper device selected.",
+                        Toast.makeText(activity, "No device selected.",
                                 Toast.LENGTH_SHORT).show();
                      }
                      });
@@ -169,17 +192,12 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     @Override
                     public void onSuccess() {
                       // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                        toast("Connection Successful");
                     }
 
                     @Override
                     public void onFailure(int reason) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(activity, "Connect failed. Retry.",
-                                    Toast.LENGTH_SHORT).show();
-                            }
-                         });
+                        toast("Failed");
                     }
                 });
 
@@ -210,5 +228,40 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         }
         Log.d("wifiMe", "Devices updates");
         deviceAdapter.notifyDataSetChanged();
+    }
+
+    public void refresh(View view){
+
+        mManager.requestPeers(mChannel, this);
+        toast("Refreshed!");
+    }
+
+    private void toast(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
+    //makes and displays an AlertDialog
+    protected void shootAlert(String msg) {
+        AlertDialog.Builder build = new AlertDialog.Builder(this);
+        build.setMessage(msg);
+        build.setCancelable(true);
+
+        build.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivity(intent);
+            }
+        });
+
+        build.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                //cancel
+                dialog.cancel();
+                turnon.setEnabled(true);
+            }
+        });
+
+        AlertDialog alert = build.create();
+        alert.show();
     }
 }

@@ -10,6 +10,28 @@
     tools:context="edu.utep.cs4330.battleship.ConnectionActivity"
     tools:showIn="@layout/activity_connection">
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/Refresh"
+            android:layout_weight="0.5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="refresh"
+            android:text="Refresh" />
+
+        <Button
+            android:id="@+id/Turnon"
+            android:layout_weight="0.5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Turn on" />
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/Connect"
         android:layout_width="match_parent"

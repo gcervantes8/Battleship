@@ -1,5 +1,6 @@
 package edu.utep.cs4330.battleship;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,6 +11,8 @@ import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -21,35 +24,48 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ConnectionActivity extends AppCompatActivity implements WifiP2pManager.PeerListListener{
+public class ConnectionActivity extends AppCompatActivity implements WifiP2pManager.PeerListListener {
 
     private final IntentFilter intentFilter = new IntentFilter();
 
-    /**The Wifi Manager that will be used to handle operations*/
+    /**
+     * The Wifi Manager that will be used to handle operations
+     */
     private WifiP2pManager.Channel mChannel;
 
-    /**Manages wifi*/
+    /**
+     * Manages wifi
+     */
     private WifiP2pManager mManager;
 
-    /**Spinner that displays all devices that are within wifi-direct range*/
+    /**
+     * Spinner that displays all devices that are within wifi-direct range
+     */
     private Spinner deviceSpinner;
 
-    /**Contains spinner information*/
+    /**
+     * Contains spinner information
+     */
     private ArrayAdapter<WifiP2pDevice> deviceAdapter;
 
-    /**Receives broadcasts*/
+    /**
+     * Receives broadcasts
+     */
     private BroadcastReceiver receiver;
 
     private Button turnon;
 
-
-    private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice(){
+    private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice() {
         @Override
-        public String toString(){
+        public String toString() {
             return "No devices found";
         }
     };
@@ -60,7 +76,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         setContentView(R.layout.activity_connection);
         deviceSpinner = (Spinner) findViewById(R.id.DeviceSpinner);
         turnon = (Button) findViewById(R.id.Turnon);
-
+        //createServer();
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
@@ -104,7 +120,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         final ConnectionActivity activity = this;
         receiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent){
+            public void onReceive(Context context, Intent intent) {
 
                 String action = intent.getAction();
                 if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
@@ -147,12 +163,41 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
     }
 
-    /**Called when p2p wifi is enabled/disabled*/
-    public void setIsWifiP2pEnabled(boolean enabled){
+    public void createServer() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int port = 8000;
+                while (true) {
+                    port++;
+                    try {
+                        ServerSocket server = new ServerSocket(port);
+//                        serverSocket = server;
+                        Log.d("wifiMe", "Found available port: " + port);
+                        server.accept();
+                        return;
+
+                    } catch (IOException e) {
+                        //Bad port, goes through while loop to try another port
+                    }
+                }
+            }
+        }).start();
+
 
     }
 
-    /** register the BroadcastReceiver with the intent values to be matched */
+    /**
+     * Called when p2p wifi is enabled/disabled
+     */
+    public void setIsWifiP2pEnabled(boolean enabled) {
+
+    }
+
+    /**
+     * register the BroadcastReceiver with the intent values to be matched
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -160,7 +205,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         registerReceiver(receiver, intentFilter);
     }
 
-    public void connect(View view){
+    public void connect(View view) {
         final ConnectionActivity activity = this;
         Thread connect = new Thread(new Runnable() {
             @Override
@@ -169,17 +214,12 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
                 WifiP2pDevice deviceSelected = (WifiP2pDevice) deviceSpinner.getSelectedItem();
 
-                if(deviceSelected == NO_DEVICES_FOUND){
-                    /*Toast.makeText(this, "No proper device selected.",
-                    Toast.LENGTH_SHORT).show();*/
-                    runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(activity, "No device selected.",
-                                Toast.LENGTH_SHORT).show();
-                     }
-                     });
-                return;
+                if (deviceSelected == NO_DEVICES_FOUND) {
+
+                    Toast.makeText(activity, "No device selected.",
+                            Toast.LENGTH_SHORT).show();
+
+                    return;
                 }
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = deviceSelected.deviceAddress;
@@ -188,12 +228,54 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
                 mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
-
                     @Override
                     public void onSuccess() {
-                      // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                        // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
                         toast("Connection Successful");
+
+                        mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
+                            @Override
+                            public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (info.isGroupOwner) {
+                                            try {
+                                                ServerSocket server = new ServerSocket(6969);
+                                                Socket client = server.accept();
+
+                                                SocketHandler.setSocket(client);
+
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                        } else {
+                                            try {
+                                                Thread.sleep(100);
+
+                                                Socket socket = new Socket();
+                                                socket.connect(new InetSocketAddress(info.groupOwnerAddress, 6969), 500);
+
+                                                SocketHandler.setSocket(socket);
+
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+
+                                        }
+
+                                        Intent i = new Intent(activity, PlaceShipsActivity.class);
+                                        startActivity(i);
+                                    }
+                                }).start();
+                            }
+                        });
                     }
+
 
                     @Override
                     public void onFailure(int reason) {
@@ -230,7 +312,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         deviceAdapter.notifyDataSetChanged();
     }
 
-    public void refresh(View view){
+    public void refresh(View view) {
 
         mManager.requestPeers(mChannel, this);
         toast("Refreshed!");

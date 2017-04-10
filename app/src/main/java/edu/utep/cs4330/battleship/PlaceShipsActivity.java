@@ -19,7 +19,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,10 +51,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         RelativeLayout layout = (RelativeLayout) getLayoutInflater().inflate(R.layout.content_place_ships, null);
         setContentView(layout);
-
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);*/
 
         boardView = (BoardView) findViewById(R.id.placeShipsBoardView);
         board = new Board();
@@ -183,7 +183,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         GameManager game =  new GameManager(board);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("gameManager", (Serializable) game);
+        bundle.putSerializable("gameManager", game);
         i.putExtra("gameManager", bundle);
 
         startActivity(i);

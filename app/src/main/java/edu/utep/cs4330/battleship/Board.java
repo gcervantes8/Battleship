@@ -134,10 +134,7 @@ public class Board implements Serializable {
 
     /**Returns true if the (x,y) coordinates given are outside the board*/
     boolean isOutOfBounds(int x, int y){
-        if(x >= size() || y >= size() || x < 0 || y < 0){
-            return true;
-        }
-        return false;
+        return x >= size() || y >= size() || x < 0 || y < 0;
     }
 
     /**Returns the amount of times that the board has been shot*/
@@ -186,5 +183,55 @@ public class Board implements Serializable {
         return true;
     }
 
+    /*public Board(String msg){
+        size = 10;
+        board = new Place[size][size];
+        int i = 0;
+        int j = 0;
+        for(int k = 0; k < msg.length(); k++){
+            char letter = msg.charAt(k);
+            if(letter == '0' || letter == '1' || letter == '2'){
+                board[j][i] = new Place(i,j);
+            }
+            else if(letter == '1'){
+                board[j][i].setShip(new Ship(3));
+            }
+            else if(letter == '2'){
+                board[j][i].hit();
+            }
+            else if(letter == '0'){
+
+            }
+
+        }
+    }
+
+    @Override
+    public String toString(){
+        String boardString = "";
+        if(board == null){
+            return "Board is null";
+        }
+        for(int i = 0; i < board[0].length; i++){
+            for(int j = 0; j < board.length; j++){
+                Place place = board[i][j];
+                if(place == null){
+                    boardString = boardString + "?";
+                }
+                else if(place.hasShip()){
+                    boardString = boardString + "1";
+                }
+                else if(place.isHit()){
+                    boardString = boardString + "2";
+                }
+                else{
+                    boardString = "0";
+                }
+            }
+            boardString = boardString + "n";
+        }
+
+        return boardString;
+    }*/
 
 }

@@ -48,6 +48,11 @@ public class GameManager implements Serializable{
         return opponent.getShipHitPlaces().size();
     }
 
+    /** Following method sets the opponent's board (replacing anything random created by computer player) */
+    public void setOpponentBoard(Board x){
+        opponent.setBoard(x);
+    }
+
     /**Gets the current active player*/
     Player getActivePlayer(){
         return activePlayer;

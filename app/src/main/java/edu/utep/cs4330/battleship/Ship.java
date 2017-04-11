@@ -42,6 +42,10 @@ class Ship implements Serializable {
         return size;
     }
 
+    public String getName(){
+        return name;
+    }
+
     /**Sets the places where ship is on, used to place the ship*/
     void placeShip(List<Place> places){
         placed = places;

@@ -1,6 +1,5 @@
 package edu.utep.cs4330.battleship;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,7 +10,6 @@ import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
@@ -245,7 +243,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                                                 ServerSocket server = new ServerSocket(6969);
                                                 Socket client = server.accept();
 
-                                                SocketHandler.setSocket(client);
+                                                NetworkAdapter.setSocket(client);
 
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -258,7 +256,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                                                 Socket socket = new Socket();
                                                 socket.connect(new InetSocketAddress(info.groupOwnerAddress, 6969), 500);
 
-                                                SocketHandler.setSocket(socket);
+                                                NetworkAdapter.setSocket(socket);
 
                                             } catch (InterruptedException | IOException e) {
                                                 e.printStackTrace();

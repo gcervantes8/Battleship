@@ -6,11 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,10 +17,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -183,9 +176,29 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         GameManager game =  new GameManager(board);
         Bundle bundle = new Bundle();
+
+        /** If the game is multiplayer */
+        if(NetworkAdapter.getSocket() != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    NetworkAdapter.setMyBoard(board);
+                    NetworkAdapter.sendMyBoard();
+                }
+            }).start();
+        }
+
+        /** Attempt to get their board, error should be thrown if player takes too long, or there was a connection error */
+        try {
+            game.setOpponentBoard(NetworkAdapter.readTheirBoard(this));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         bundle.putSerializable("gameManager", game);
         i.putExtra("gameManager", bundle);
-
         startActivity(i);
     }
 

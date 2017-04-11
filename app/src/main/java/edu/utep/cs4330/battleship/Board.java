@@ -234,4 +234,38 @@ public class Board implements Serializable {
         return boardString;
     }*/
 
+    @Override
+    public String toString(){
+        String boardString = "";
+        if(board == null){
+            return "Board is null";
+        }
+        for(int i = 0; i < board[0].length; i++){
+            for(int j = 0; j < board.length; j++){
+                Place place = board[i][j];
+                Ship ghost = place.getShip();
+
+                if(ghost != null){
+                    String shipType = ghost.getName();
+                    if(shipType.contains("aircraftcarrier"))
+                        boardString += "5";
+                    else if(shipType.contains("battleship"))
+                        boardString += "4";
+                    else if(shipType.contains("submarine"))
+                        boardString += "3";
+                    else if(shipType.contains("frigate"))
+                        boardString += "2";
+                    else //Sweeper
+                        boardString += "1";
+                }
+                //empty place
+                else{
+                    boardString = "0";
+                }
+            }
+        }
+
+        return boardString;
+    }
+
 }

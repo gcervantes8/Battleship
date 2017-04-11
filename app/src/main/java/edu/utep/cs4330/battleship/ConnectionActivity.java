@@ -183,7 +183,6 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
             }
         }).start();
 
-
     }
 
     /**
@@ -213,9 +212,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                 WifiP2pDevice deviceSelected = (WifiP2pDevice) deviceSpinner.getSelectedItem();
 
                 if (deviceSelected == NO_DEVICES_FOUND) {
-
-                    Toast.makeText(activity, "No device selected.",
-                            Toast.LENGTH_SHORT).show();
+                    toast("No device selected");
 
                     return;
                 }
@@ -314,8 +311,15 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         toast("Refreshed!");
     }
 
-    private void toast(String s) {
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    private void toast(final String s) {
+        final Context context = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     //makes and displays an AlertDialog

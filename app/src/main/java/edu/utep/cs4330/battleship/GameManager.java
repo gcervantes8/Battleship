@@ -36,6 +36,14 @@ public class GameManager implements Serializable{
         activePlayer = player;
     }
 
+    //TODO
+    GameManager(Board playerBoard, Board opponentBoard){
+        player = new Player(playerBoard);
+        opponent = new ComputerPlayer(opponentBoard);
+        //opponent = new ComputerPlayer();
+        activePlayer = player;
+    }
+
     /**Retrieves from given player's board how many ships they have sunk
      * @param player is player's ships you want to check amount of sunk ship*/
     int getShipsSunkCount(Player player){

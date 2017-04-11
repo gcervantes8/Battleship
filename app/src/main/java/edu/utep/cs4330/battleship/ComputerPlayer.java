@@ -16,6 +16,12 @@ class ComputerPlayer extends Player implements Serializable {
         strategyInterface = new RandomStrategy();
     }
 
+    ComputerPlayer(Board board){
+        super();
+        super.setBoard(board);
+        strategyInterface = new RandomStrategy();
+    }
+
     /**Returns a place for the computer to shoot*/
     Place pickPlace(Board opponentBoard){
         return strategyInterface.pickStrategyMove(opponentBoard);

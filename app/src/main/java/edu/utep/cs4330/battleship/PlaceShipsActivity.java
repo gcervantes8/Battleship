@@ -15,6 +15,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -26,7 +27,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
     private BoardView boardView;
 
     /**The board where ships will be placed*/
-    private Board board;
+    private Board playerBoard;
 
     /**The ship that is being dragged, null if no ship is being dragged*/
     private ShipView shipBeingDragged = null;
@@ -38,6 +39,12 @@ public class PlaceShipsActivity extends AppCompatActivity {
     private Button placeButton;
 
 
+    /**Opponent's board, given by other user using network connection, if playing p2p game, otherwise is should always be null*/
+    private Board opponentBoard = null;
+
+
+    private boolean donePlacingShips = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +53,8 @@ public class PlaceShipsActivity extends AppCompatActivity {
         setContentView(layout);
 
         boardView = (BoardView) findViewById(R.id.placeShipsBoardView);
-        board = new Board();
-        boardView.setBoard(board);
+        playerBoard = new Board();
+        boardView.setBoard(playerBoard);
         boardView.displayBoardsShips(true);
 
         placeButton = (Button) findViewById(R.id.placeButton);
@@ -73,10 +80,14 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         setContentView(layout);
 
-        setBoardDragListener(boardView, board);
+        setBoardDragListener(boardView, playerBoard);
 
         boardView.invalidate();
+
+        startReadingMessage();
     }
+
+
 
     /**Sets drag listener for the board, snaps the object being dragged onto the board.
      * Ship is also placed on the board*/
@@ -156,6 +167,37 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
+    void startReadingMessage(){
+
+          Thread readMessages = new Thread(new Runnable(){
+              public void run(){
+                  while(true){
+                       String msg = NetworkAdapter.readMessage();
+                        if(msg == null){
+                           //Connection lost handler
+
+                            toast("Connection Lost! Now playing single player game against computer");
+                            return;
+                        }
+                       else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
+                            //Gets board
+                            opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
+
+                            //If you are already done placing ships, and you have received your opponent's board, then startActivity
+                            if(donePlacingShips){
+
+                            }
+                       }
+                  }
+              }
+          });
+        readMessages.start();
+    }
+
+    private void toast(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
     /**Returns true if all ships have been placed*/
     public boolean allShipsPlaced(){
         for(ShipView ship: fleetView){
@@ -172,30 +214,47 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
     /**Segues to the play activity, gives information to play activity*/
     public void segueToPlayActivity(View view){
+
+        donePlacingShips = true;
+
         Intent i = new Intent(this, MainActivity.class);
 
-        GameManager game =  new GameManager(board);
+        GameManager game =  new GameManager(playerBoard);
         Bundle bundle = new Bundle();
 
+        //If there is a p2p connection
+        if(NetworkAdapter.getSocket() != null){
+
+            //If other player has given us their board
+            if(opponentBoard != null){
+                game =  new GameManager(playerBoard, opponentBoard);
+                bundle.putSerializable("gameManager", game);
+                i.putExtra("gameManager", bundle);
+                startActivity(i);
+            }
+            else{
+                toast("Game will start when the other player places their ships");
+                return;
+            }
+        }
+
         /** If the game is multiplayer */
-        if(NetworkAdapter.getSocket() != null) {
+        /*if(NetworkAdapter.getSocket() != null) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    NetworkAdapter.setMyBoard(board);
+                    NetworkAdapter.setMyBoard(playerBoard);
                     NetworkAdapter.sendMyBoard();
                 }
             }).start();
-        }
+        }*/
 
         /** Attempt to get their board, error should be thrown if player takes too long, or there was a connection error */
-        try {
+        /*try {
             game.setOpponentBoard(NetworkAdapter.readTheirBoard(this));
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        }*/
 
         bundle.putSerializable("gameManager", game);
         i.putExtra("gameManager", bundle);

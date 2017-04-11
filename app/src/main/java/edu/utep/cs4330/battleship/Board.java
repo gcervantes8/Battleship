@@ -51,7 +51,7 @@ public class Board implements Serializable {
         }
     }
 
-    /**Given the ship, place, and direction*/
+    /**Places the ship, takes in the ship, place, and direction*/
     boolean placeShip(Ship ship, int x, int y, boolean dir){
 
         if(ship == null){
@@ -193,20 +193,17 @@ public class Board implements Serializable {
             if(letter == '0' || letter == '1' || letter == '2'){
                 board[j][i] = new Place(i,j);
             }
-            else if(letter == '1'){
+            if(letter == '1'){
                 board[j][i].setShip(new Ship(3));
             }
-            else if(letter == '2'){
+            if(letter == '2'){
                 board[j][i].hit();
-            }
-            else if(letter == '0'){
-
             }
 
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public String toString(){
         String boardString = "";
         if(board == null){

@@ -43,8 +43,7 @@ public class NetworkAdapter {
     static void setSocket(Socket s){
         try {
             Log.d("wifiMe", "socket set, is socket null? " + (s == null));
-
-            if(socket == null){
+            if(s == null){
                 return;
             }
             socket = s;
@@ -54,7 +53,7 @@ public class NetworkAdapter {
             Log.d("wifiMe", "is 'in' null?  " + (in == null) + " is 'out' null? "  + (out == null) );
         }
         catch(IOException e){
-            Log.d("Exception", "Exception thrown in Network Adapter");
+            Log.d("wifiMe", "Exception thrown in NetworkAdapter constructor");
             e.printStackTrace();
         }
     }
@@ -99,6 +98,7 @@ public class NetworkAdapter {
     static String readMessage(){
 
         try {
+            Log.d("wifiMe", "Going to read messages part 1");
             if(in == null){
                 //Only returns null if sockets aren't set correctly
 
@@ -111,8 +111,11 @@ public class NetworkAdapter {
             }
 
 
+            Log.d("wifiMe", "Going to read messages part 2");
+
             String msg;
             while ((msg = in.readLine()) != null) {
+                Log.d("wifiMe", "Got message");
                 if(msg.equals("") || msg.equals(" ")){ //Checking " " probably unnecessary
                     continue;
                 }
@@ -120,8 +123,9 @@ public class NetworkAdapter {
             }
 
         } catch (IOException e) {
-            Log.d("Exception", "IOException ON NETWORK ADAPTER CLASS, READ MESSAGES METHOD");
+            Log.d("wifiMe", "IOException ON NETWORK ADAPTER CLASS, READ MESSAGES METHOD");
         }
+        Log.d("wifiMe", "Return msg null");
         return null;
     }
 
@@ -134,9 +138,9 @@ public class NetworkAdapter {
             return null;
         }
 
-        opponentBoard = opponentBoard.substring(NetworkAdapter.PLACED_SHIPS.length());
+        opponentBoard = opponentBoard.substring(NetworkAdapter.PLACED_SHIPS.length()); //good
 
-        Log.d("wifiMe", "Attempting to decipher board string: " + opponentBoard);
+        Log.d("wifiMe", "Attempting to convert string to board, the string: " + opponentBoard);
         Board b = new Board(10);
         int traverseString = 0;
         char[] tb = opponentBoard.toCharArray();
@@ -163,6 +167,7 @@ public class NetworkAdapter {
             }
         }
 
+        Log.d("wifiMe", "Deciphered board " + b.toString());
         return b;
     }
 
@@ -276,12 +281,21 @@ public class NetworkAdapter {
 
     /**Writes message*/
     public static void writeMessage(String msg){
-        out.print(msg);
+        out.println(msg);
+        out.flush();
+    }
+
+    public static void writeBoardMessage(Board board){
+        out.println(PLACED_SHIPS + board.toString());
+
+        Log.d("wifiMe", "Board being sent: " + board.toString());
+        out.flush();
     }
 
     /**Writes a place shot message, and places it in given coordinates*/
     public static void writePlaceShotMessage(String msg, int x, int y){
-        out.print(msg + " " + x + "," + y);
+        out.println(msg + " " + x + "," + y);
+        out.flush();
     }
 
     /**Returns true if character is a digit*/

@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -85,6 +86,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         boardView.invalidate();
 
+        Log.d("wifiMe", "Is Socket null? " + (NetworkAdapter.getSocket()==null) );
         startReadingMessage();
     }
 
@@ -174,21 +176,26 @@ public class PlaceShipsActivity extends AppCompatActivity {
               public void run(){
                   while(true){
                        String msg = NetworkAdapter.readMessage();
+                      Log.d("wifiMe", "Message received: " + msg);
                         if(msg == null){
                            //Connection lost handler
-
+                            Log.d("wifiMe", "Connection Lost!");
                             toast("Connection Lost! Now playing single player game against computer");
                             return;
                         }
                        else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
+                            Log.d("wifiMe", "Found board message");
                             //Gets board
                             opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
-
+                            Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
                             //If you are already done placing ships, and you have received your opponent's board, then startActivity
                             if(donePlacingShips){
-
+                                GameManager game = new GameManager(playerBoard, opponentBoard);
+                                segueToActivity(game);
                             }
                        }
+
+
                   }
               }
           });
@@ -220,25 +227,31 @@ public class PlaceShipsActivity extends AppCompatActivity {
         return true;
     }
 
+    public void segueToActivity(GameManager game){
+        Intent i = new Intent(this, MainActivity.class);
+
+        Bundle bundle = new Bundle();
+
+
+        bundle.putSerializable("gameManager", game);
+        i.putExtra("gameManager", bundle);
+        startActivity(i);
+
+    }
+
     /**Segues to the play activity, gives information to play activity*/
     public void segueToPlayActivity(View view){
 
         donePlacingShips = true;
 
-        Intent i = new Intent(this, MainActivity.class);
-
-        GameManager game =  new GameManager(playerBoard);
-        Bundle bundle = new Bundle();
-
         //If there is a p2p connection
         if(NetworkAdapter.getSocket() != null){
-
+            NetworkAdapter.writeBoardMessage(playerBoard);
+            Log.d("wifiMe", "Board was sent");
             //If other player has given us their board
             if(opponentBoard != null){
-                game =  new GameManager(playerBoard, opponentBoard);
-                bundle.putSerializable("gameManager", game);
-                i.putExtra("gameManager", bundle);
-                startActivity(i);
+                GameManager game =  new GameManager(playerBoard, opponentBoard);
+                segueToActivity(game);
             }
             else{
                 toast("Game will start when the other player places their ships");
@@ -264,9 +277,9 @@ public class PlaceShipsActivity extends AppCompatActivity {
             e.printStackTrace();
         }*/
 
-        bundle.putSerializable("gameManager", game);
-        i.putExtra("gameManager", bundle);
-        startActivity(i);
+        Log.d("wifiMe", "Not playing wifi game");
+        GameManager game =  new GameManager(playerBoard);
+        segueToActivity(game);
     }
 
     /**Correctly scales the image and gives it a touch listener*/

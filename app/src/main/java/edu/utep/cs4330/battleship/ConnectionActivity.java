@@ -61,6 +61,8 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
     private Button turnon;
 
+    final private int port = 7070;
+
     private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice() {
         @Override
         public String toString() {
@@ -161,7 +163,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
     }
 
-    public void createServer() {
+    /*public void createServer() {
 
         new Thread(new Runnable() {
             @Override
@@ -183,7 +185,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
             }
         }).start();
 
-    }
+    }*/
 
     /**
      * Called when p2p wifi is enabled/disabled
@@ -226,7 +228,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     @Override
                     public void onSuccess() {
                         // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                        toast("Connection Successful");
+                        //toast("Connection Successful");
 
                         mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
                             @Override
@@ -236,27 +238,35 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                                     @Override
                                     public void run() {
                                         if (info.isGroupOwner) {
-                                            try {
-                                                ServerSocket server = new ServerSocket(6969);
-                                                Socket client = server.accept();
-
-                                                NetworkAdapter.setSocket(client);
-
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-
+                                            Log.d("wifiMe", " WAS GROUP OWNER");
+                                            //toast("GROUP OWNER");
+                                            createServer();
                                         } else {
                                             try {
+                                                Log.d("wifiMe", " WAS NOT GROUP OWNER");
+                                                //toast("NOT GROUP OWNER");
                                                 Thread.sleep(100);
 
-                                                Socket socket = new Socket();
-                                                socket.connect(new InetSocketAddress(info.groupOwnerAddress, 6969), 500);
+                                                //Socket socket = new Socket();
+                                                //socket.connect(new InetSocketAddress(info.groupOwnerAddress, port), 500);
 
+                                                Socket socket = new Socket(info.groupOwnerAddress ,port);
+
+                                                Thread.sleep(100);
+
+                                                Log.d("wifiMe", "SOCKET WAS NULL? " + (socket == null));
                                                 NetworkAdapter.setSocket(socket);
+                                                toast("Successfully connected!");
 
                                             } catch (InterruptedException | IOException e) {
                                                 e.printStackTrace();
+
+
+                                                Log.d("wifiMe", "EXCEPTION THROWN WHEN CREATING SOCKET, CREATING SERVER INSTEAD");
+                                                //Create socket instead
+                                                createServer();
+
+
                                             }
 
                                         }
@@ -272,13 +282,31 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
                     @Override
                     public void onFailure(int reason) {
-                        toast("Failed");
+                        toast("Connection Failed");
                     }
                 });
 
             }
         });
         connect.start();
+    }
+
+    /**Blocks calling thread and creates server, unblocked when there is a connection*/
+    private boolean createServer(){
+
+        try {
+            ServerSocket server = new ServerSocket(port);
+            Socket client = server.accept();
+            NetworkAdapter.setSocket(client);
+            toast("Created server!");
+        }
+        catch(IOException e){
+            Log.d("wifiMe", "Failed creating server");
+            return false;
+        }
+
+        Log.d("wifiMe", "Success creating server, server created and connected");
+        return true;
     }
 
     @Override

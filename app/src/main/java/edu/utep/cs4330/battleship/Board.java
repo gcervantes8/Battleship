@@ -257,7 +257,7 @@ public class Board implements Serializable {
                 }
                 //empty place
                 else{
-                    boardString = "0";
+                    boardString += "0";
                 }
             }
         }

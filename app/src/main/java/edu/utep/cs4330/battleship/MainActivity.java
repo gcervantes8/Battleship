@@ -112,8 +112,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        playerBoardView.invalidate();
-        opponentBoardView.invalidate();
+        updateBoards();
     }
 
     void startReadingNetworkMessages(){
@@ -249,6 +248,7 @@ public class MainActivity extends AppCompatActivity{
 
         opponentBoardView.invalidate();
 
+        updateBoards();
         boolean playerWon = game.getOpponentPlayer().areAllShipsSunk();
         if(playerWon){
             updateWinDisplay(true);
@@ -317,8 +317,7 @@ public class MainActivity extends AppCompatActivity{
             playSound(R.raw.miss);
         }
 
-        playerBoardView.invalidate();
-
+        updateBoards();
         boolean p2pOpponentWon = game.getPlayer().areAllShipsSunk();
         if(p2pOpponentWon){
             updateWinDisplay(false);
@@ -359,16 +358,12 @@ public class MainActivity extends AppCompatActivity{
                             playSound(R.raw.miss);
                         }
                         final boolean computerWon = game.getPlayer().areAllShipsSunk();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                playerBoardView.invalidate();
-                                if(computerWon){
-                                    updateWinDisplay(false);
-                                    resultsDialog(false,  game.getShipsSunkCount(game.getPlayer()) );
-                                }
-                            }
-                        });
+                        updateBoards();
+                        if(computerWon){
+                            updateWinDisplay(false);
+                            resultsDialog(false,  game.getShipsSunkCount(game.getPlayer()) );
+                        }
+
 
                         if(computerWon){
                             return;
@@ -387,6 +382,16 @@ public class MainActivity extends AppCompatActivity{
             });
 
             thread.start();
+    }
+
+    public void updateBoards(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                opponentBoardView.invalidate();
+                playerBoardView.invalidate();
+            }
+        });
     }
 
     /**Shows pop-up so that user can select their opponent*/
@@ -413,27 +418,33 @@ public class MainActivity extends AppCompatActivity{
     }
 
     /**Uses AlertDialog display a winning dialog after the player has won the game*/
-    private void resultsDialog(boolean winner, int shipsSunk){
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        String title, description;
-        if(winner){
-            title = getString(R.string.winner_title);
-            description = getString(R.string.winner_description) + " " + shipsSunk + " ships";
-        }
-        else{
-            title = getString(R.string.loser_title);
-            description = getString(R.string.loser_description) + " " + shipsSunk + " ships";
-        }
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(description);
+    private void resultsDialog(final boolean winner, final int shipsSunk){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                String title, description;
+                if(winner){
+                    title = getString(R.string.winner_title);
+                    description = getString(R.string.winner_description) + " " + shipsSunk + " ships";
+                }
+                else{
+                    title = getString(R.string.loser_title);
+                    description = getString(R.string.loser_description) + " " + shipsSunk + " ships";
+                }
+                alertDialog.setTitle(title);
+                alertDialog.setMessage(description);
 
-        //Ok button
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+                //Ok button
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                alertDialog.show();
             }
         });
 
-        alertDialog.show();
     }
 
     @Override

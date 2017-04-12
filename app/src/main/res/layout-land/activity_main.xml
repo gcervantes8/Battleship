@@ -19,7 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.53"
+            android:layout_weight=".93"
             android:elevation="1dp"
             android:orientation="horizontal">
 
@@ -83,7 +83,7 @@
             android:id="@+id/gameStatus"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.11"
+            android:layout_weight="0.07"
             android:text="@string/player_turn_status"
             android:textAlignment="center"
             android:textColor="@android:color/background_light" />

@@ -1,6 +1,7 @@
 package edu.utep.cs4330.battleship;
 
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -194,8 +195,15 @@ public class PlaceShipsActivity extends AppCompatActivity {
         readMessages.start();
     }
 
-    private void toast(String s) {
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    private void toast(final String s) {
+        //Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+        final Context context = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**Returns true if all ships have been placed*/

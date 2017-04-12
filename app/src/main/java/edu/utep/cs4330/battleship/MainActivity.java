@@ -1,6 +1,7 @@
 package edu.utep.cs4330.battleship;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
@@ -14,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Serializable;
 
@@ -71,6 +73,14 @@ public class MainActivity extends AppCompatActivity{
 
         //Gives board references to the BoardViews
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
+
+
+        if(NetworkAdapter.hasConnection()) {
+            startReadingNetworkMessages();
+        }
+        else{
+            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
+        }
     }
 
     @Override
@@ -84,7 +94,7 @@ public class MainActivity extends AppCompatActivity{
     public void onSaveInstanceState(Bundle bundle) {
         //Saves Game State for before an orientation happens
         super.onSaveInstanceState(bundle);
-        bundle.putSerializable("game", (Serializable) game);
+        bundle.putSerializable("game", game);
     }
 
     /**Gives a Board references to the BoardViews*/
@@ -104,6 +114,43 @@ public class MainActivity extends AppCompatActivity{
 
         playerBoardView.invalidate();
         opponentBoardView.invalidate();
+    }
+
+    void startReadingNetworkMessages(){
+
+        Thread readMessages = new Thread(new Runnable(){
+            public void run(){
+                while(true){
+                    String msg = NetworkAdapter.readMessage();
+                    Log.d("wifiMe", "Message received: " + msg);
+                    if(msg == null){
+                        //Connection lost handler
+                        Log.d("wifiMe", "Connection Lost!");
+                        toast("Connection Lost! Now playing single player game against computer");
+                        return;
+                    }
+                    else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
+                        Log.d("wifiMe", "Received place ships message?? Shouldn't have found one, debug");
+                    }
+                    else if(msg.startsWith(NetworkAdapter.NEW_GAME)){
+                        Log.d("wifiMe", "New game requested, but we will ignore");
+                    }
+                    else if(msg.startsWith(NetworkAdapter.PLACE_SHOT)){
+                        Log.d("wifiMe", "Place was shot message received, message: " + msg);
+                        int[] placeShot = NetworkAdapter.decipherPlaceShot(msg);
+                        if(placeShot == null){
+                            Log.d("wifiMe", "Found no coordinates");
+                            return;
+                        }
+                        Log.d("wifiMe", "Placed shot on: " + placeShot[0] + ", " + placeShot[1]);
+                        p2pOpponentPlay(placeShot[0], placeShot[1]);
+
+                    }
+
+                }
+            }
+        });
+        readMessages.start();
     }
 
     /**Resets game when button was tapped*/
@@ -176,26 +223,27 @@ public class MainActivity extends AppCompatActivity{
 
         Place placeToHit = game.getOpponentPlayer().getBoard().placeAt(x, y);
 
-        boolean isGameOver = game.getPlayer().areAllShipsSunk();
+        boolean isGameOver = game.getPlayer().areAllShipsSunk() || game.getOpponentPlayer().areAllShipsSunk();
         boolean computersTurn = game.getActivePlayer() != game.getPlayer();
         boolean placeAlreadyHit = placeToHit.isHit();
 
-        //If all ships are sunk, then game is over, do nothing if button click
+        //If game is over, or is computer's turn, or place touched was already hit
         if(isGameOver || computersTurn || placeAlreadyHit){
+            //Ignore button click
             return;
         }
 
         game.hitPlace(x, y);
 
 
-        //If place had a ship
+        //If place we hit had a ship
         if(placeToHit.hasShip()){
             playSound(R.raw.shiphit);
         }
         //Player keeps turn if they hit a ship
         else{
             game.changeTurn();
-            gameStatus.setText(getString(R.string.opponent_turn_status));
+            updateTurnDisplay();
             playSound(R.raw.miss);
         }
 
@@ -203,16 +251,80 @@ public class MainActivity extends AppCompatActivity{
 
         boolean playerWon = game.getOpponentPlayer().areAllShipsSunk();
         if(playerWon){
-            gameStatus.setText(getString(R.string.win_status));
+            updateWinDisplay(true);
             resultsDialog(true, game.getShipsSunkCount(game.getPlayer()) );
             return;
         }
 
-        boolean isComputersTurn = game.getActivePlayer() != game.getPlayer();
-        if(isComputersTurn){
-            computerTurn();
+        if(NetworkAdapter.hasConnection()){
+            NetworkAdapter.writePlaceShotMessage(x, y);
+        }else {
+
+            boolean isComputersTurn = game.getActivePlayer() != game.getPlayer();
+            if (isComputersTurn) {
+                computerTurn();
+            }
+        }
+    }
+
+    public void updateTurnDisplay(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(game.getOpponentPlayer() == game.getActivePlayer()) {
+                    if(NetworkAdapter.hasConnection()){
+                        gameStatus.setText(getString(R.string.opponent_turn_status));
+                    }
+                    else{
+                        gameStatus.setText(getString(R.string.computer_turn_status));
+                    }
+                }
+                else{
+                    gameStatus.setText(getString(R.string.player_turn_status));
+                }
+            }
+        });
+    }
+
+    public void updateWinDisplay(final boolean playerWon){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(playerWon){
+                    gameStatus.setText(getString(R.string.win_status));
+                }
+                else{
+                    gameStatus.setText(getString(R.string.lose_status));
+                }
+            }
+        });
+    }
+
+    public void p2pOpponentPlay(int x, int y){
+        Place placeToHit = game.getPlayer().getBoard().placeAt(x, y);
+
+        game.hitPlace(x, y);
+
+
+        //If place we hit had a ship
+        if(placeToHit.hasShip()){
+            playSound(R.raw.shiphit);
+        }
+        //Player keeps turn if they hit a ship
+        else{
+            game.changeTurn();
+            updateTurnDisplay();
+            playSound(R.raw.miss);
         }
 
+        playerBoardView.invalidate();
+
+        boolean p2pOpponentWon = game.getPlayer().areAllShipsSunk();
+        if(p2pOpponentWon){
+            updateWinDisplay(false);
+            resultsDialog(true, game.getShipsSunkCount(game.getPlayer()) );
+            return;
+        }
     }
 
     /**Takes care of computer shooting the board.
@@ -224,7 +336,9 @@ public class MainActivity extends AppCompatActivity{
                 public void run() {
                     try {
                         Place placeToHit = game.computerPickPlace();
-                        sleep(450);  //Prevents computer from placing immediately after player places
+
+                        //Prevents computer from placing immediately after player places
+                        sleep(450);
 
                         game.computerPlay(placeToHit);
 
@@ -241,12 +355,7 @@ public class MainActivity extends AppCompatActivity{
                         }
                         else{
                             game.changeTurn();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    gameStatus.setText(getString(R.string.player_turn_status));
-                                }
-                            });
+                            updateTurnDisplay();
                             playSound(R.raw.miss);
                         }
                         final boolean computerWon = game.getPlayer().areAllShipsSunk();
@@ -255,7 +364,7 @@ public class MainActivity extends AppCompatActivity{
                             public void run() {
                                 playerBoardView.invalidate();
                                 if(computerWon){
-                                    gameStatus.setText(getString(R.string.lose_status));
+                                    updateWinDisplay(false);
                                     resultsDialog(false,  game.getShipsSunkCount(game.getPlayer()) );
                                 }
                             }
@@ -354,5 +463,16 @@ public class MainActivity extends AppCompatActivity{
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void toast(final String s) {
+        //Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+        final Context context = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

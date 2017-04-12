@@ -56,7 +56,7 @@ public class GameManager implements Serializable{
         return opponent.getShipHitPlaces().size();
     }
 
-    /** Following method sets the opponent's board (replacing anything random created by computer player) */
+    /** Following method sets the opponent's new board*/
     public void setOpponentBoard(Board x){
         opponent.setBoard(x);
     }

@@ -26,13 +26,13 @@ public class NetworkAdapter {
     private static BufferedReader in;
 
     /**Message constant, sent or received when all your ships have been placed*/
-    public static final String PLACED_SHIPS = "SHIPS PLACED";
+    static final String PLACED_SHIPS = "SHIPS PLACED";
 
     /**Message constant, Sent or received when a player requests to play a new game*/
     public static final String NEW_GAME = "NEW GAME REQUEST";
 
     /**Message constant, Sent or received when a place has been shot, message sent usually contains coordinates in the format of "PLACE SHOT 3,5"*/
-    public static final String PLACE_SHOT = "PLACE SHOT";
+    static final String PLACE_SHOT = "PLACE SHOT";
 
     //public static Board myBoard;
 
@@ -293,9 +293,13 @@ public class NetworkAdapter {
     }
 
     /**Writes a place shot message, and places it in given coordinates*/
-    public static void writePlaceShotMessage(String msg, int x, int y){
-        out.println(msg + " " + x + "," + y);
+    public static void writePlaceShotMessage(int x, int y){
+        out.println(PLACE_SHOT + " " + x + "," + y);
         out.flush();
+    }
+
+    public static boolean hasConnection(){
+        return (socket != null);
     }
 
     /**Returns true if character is a digit*/

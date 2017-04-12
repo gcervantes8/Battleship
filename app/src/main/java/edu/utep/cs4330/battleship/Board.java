@@ -172,6 +172,19 @@ public class Board implements Serializable {
     }
 
     /**Returns true if all the ships have been hit*/
+    boolean isAllSunk(){
+        for(int i = 0; i < size(); i++){
+            for(int j = 0; j < size(); j++){
+                Place place = board[i][j];
+                if(place.hasShip() && !place.isHit()){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**Returns true if all the ships have been hit*/
     boolean isAllHit(){
         for(int i = 0; i < size(); i++){
             for(int j = 0; j < size(); j++){

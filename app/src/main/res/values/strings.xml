@@ -19,7 +19,8 @@
     <string name="winner_description">You have beaten the game by sinking all of the ships! \n\n You sunk all </string>
     <string name="loser_description">You have lost the game, your opponent sank all your ships before you did.\n\n You sunk </string>
     <string name="player_turn_status">It is your turn </string>
-    <string name="opponent_turn_status">It it computer\'s turn </string>
+    <string name="computer_turn_status">It it computer\'s turn </string>
+    <string name="opponent_turn_status">It it opponent\'s turn </string>
     <string name="win_status">You have won the game! </string>
     <string name="lose_status">You have lost the game! </string>
     <string name="title_activity_connection">ConnectionActivity</string>

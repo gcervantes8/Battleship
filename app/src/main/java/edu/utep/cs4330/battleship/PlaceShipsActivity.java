@@ -87,7 +87,12 @@ public class PlaceShipsActivity extends AppCompatActivity {
         boardView.invalidate();
 
         Log.d("wifiMe", "Is Socket null? " + (NetworkAdapter.getSocket()==null) );
-        startReadingMessage();
+        if(NetworkAdapter.hasConnection()) {
+            startReadingMessage();
+        }
+        else{
+            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
+        }
     }
 
 
@@ -200,17 +205,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
               }
           });
         readMessages.start();
-    }
-
-    private void toast(final String s) {
-        //Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
-        final Context context = this;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     /**Returns true if all ships have been placed*/
@@ -429,6 +423,16 @@ public class PlaceShipsActivity extends AppCompatActivity {
                 image.setMaxHeight(boardView.getMeasuredHeight()/10);
             }
 
+        });
+    }
+
+    private void toast(final String s) {
+        final Context context = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

@@ -1,8 +1,6 @@
 package edu.utep.cs4330.battleship;
 
-import android.app.Activity;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +32,7 @@ public class NetworkAdapter {
     /**Message constant, Sent or received when a place has been shot, message sent usually contains coordinates in the format of "PLACE SHOT 3,5"*/
     static final String PLACE_SHOT = "PLACE SHOT";
 
-    //public static Board myBoard;
+    public static boolean shouldThereBeAConnection;
 
     //Methods accessed statically, prevents objects from being created to avoid confusion
     private NetworkAdapter(){}
@@ -97,7 +95,8 @@ public class NetworkAdapter {
      * */
     static String readMessage(){
 
-        try {
+
+        try {/*
             Log.d("wifiMe", "Going to read messages part 1");
             if(in == null){
                 //Only returns null if sockets aren't set correctly
@@ -109,18 +108,24 @@ public class NetworkAdapter {
                     in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 }
             }
-
+*/
 
             Log.d("wifiMe", "Going to read messages part 2");
 
             String msg;
+
+
+            msg = in.readLine();
+            return msg;
+
+/*
             while ((msg = in.readLine()) != null) {
                 Log.d("wifiMe", "Got message");
                 if(msg.equals("") || msg.equals(" ")){ //Checking " " probably unnecessary
                     continue;
                 }
                 return msg;
-            }
+            }*/
 
         } catch (IOException e) {
             Log.d("wifiMe", "IOException ON NETWORK ADAPTER CLASS, READ MESSAGES METHOD");
@@ -128,10 +133,6 @@ public class NetworkAdapter {
         Log.d("wifiMe", "Return msg null");
         return null;
     }
-
-
-
-
 
     static Board decipherPlaceShips(String opponentBoard){
         if(opponentBoard == null || !opponentBoard.startsWith(PLACED_SHIPS)){
@@ -237,10 +238,9 @@ public class NetworkAdapter {
                 });
             }
             // Sleep for same amount as toast duration to allow time for opponent to send their board
-            //  (LENGTH_SHORT is an int! So I'm assuming it refers to number of seconds, so I'm
-            // multiplying it by 1000 to turn into millis.
+            //  (LENGTH_SHORT is 2000ms
             //
-            Thread.sleep(Toast.LENGTH_SHORT*1000);
+            Thread.sleep(2000);
 
             timeout--;
 
@@ -289,13 +289,12 @@ public class NetworkAdapter {
         out.println(PLACED_SHIPS + board.toString());
 
         Log.d("wifiMe", "Board being sent: " + board.toString());
-        out.flush();
     }
 
     /**Writes a place shot message, and places it in given coordinates*/
     public static void writePlaceShotMessage(int x, int y){
         out.println(PLACE_SHOT + " " + x + "," + y);
-        out.flush();
+//        out.flush();//flush clears the message you just wrote
     }
 
     public static boolean hasConnection(){

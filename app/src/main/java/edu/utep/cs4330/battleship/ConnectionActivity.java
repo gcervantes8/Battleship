@@ -23,9 +23,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -227,8 +229,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
                     @Override
                     public void onSuccess() {
-                        // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
-                        //toast("Connection Successful");
+                        toast("Wi-fi direct connection established.");
 
                         mManager.requestConnectionInfo(mChannel, new WifiP2pManager.ConnectionInfoListener() {
                             @Override
@@ -238,37 +239,9 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                                     @Override
                                     public void run() {
                                         if (info.isGroupOwner) {
-                                            Log.d("wifiMe", " WAS GROUP OWNER");
-                                            //toast("GROUP OWNER");
                                             createServer();
                                         } else {
-                                            try {
-                                                Log.d("wifiMe", " WAS NOT GROUP OWNER");
-                                                //toast("NOT GROUP OWNER");
-                                                Thread.sleep(100);
-
-                                                //Socket socket = new Socket();
-                                                //socket.connect(new InetSocketAddress(info.groupOwnerAddress, port), 500);
-
-                                                Socket socket = new Socket(info.groupOwnerAddress ,port);
-
-                                                Thread.sleep(100);
-
-                                                Log.d("wifiMe", "SOCKET WAS NULL? " + (socket == null));
-                                                NetworkAdapter.setSocket(socket);
-                                                toast("Successfully connected!");
-
-                                            } catch (InterruptedException | IOException e) {
-                                                e.printStackTrace();
-
-
-                                                Log.d("wifiMe", "EXCEPTION THROWN WHEN CREATING SOCKET, CREATING SERVER INSTEAD");
-                                                //Create socket instead
-                                                createServer();
-
-
-                                            }
-
+                                            createClient(info.groupOwnerAddress);
                                         }
 
                                         Intent i = new Intent(activity, PlaceShipsActivity.class);
@@ -282,7 +255,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
                     @Override
                     public void onFailure(int reason) {
-                        toast("Connection Failed");
+                        toast("Connection Failed.");
                     }
                 });
 
@@ -291,21 +264,39 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         connect.start();
     }
 
-    /**Blocks calling thread and creates server, unblocked when there is a connection*/
-    private boolean createServer(){
+    /**
+     * Blocks calling thread and creates server, unblocked when there is a connection
+     */
+    private boolean createServer() {
 
         try {
             ServerSocket server = new ServerSocket(port);
             Socket client = server.accept();
             NetworkAdapter.setSocket(client);
-            toast("Created server!");
-        }
-        catch(IOException e){
+
+        } catch (IOException e) {
             Log.d("wifiMe", "Failed creating server");
             return false;
         }
 
-        Log.d("wifiMe", "Success creating server, server created and connected");
+        toast("Game connection to peer established.");
+        return true;
+    }
+
+    private boolean createClient(InetAddress address) {
+
+        Socket socket = new Socket();
+        try {
+            socket.connect(new InetSocketAddress(address, port), 20000);
+        } catch (SocketTimeoutException e) {
+            toast("Connection timed out");
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        toast("Game connection to peer established.");
+        NetworkAdapter.setSocket(socket);
         return true;
     }
 

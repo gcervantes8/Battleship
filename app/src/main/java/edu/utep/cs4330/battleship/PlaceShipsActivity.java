@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
     private Board opponentBoard = null;
 
 
-    private boolean donePlacingShips = false;
+//    private boolean donePlacingShips = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +84,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         setBoardDragListener(boardView, playerBoard);
 
         boardView.invalidate();
-
+/*
         Log.d("wifiMe", "Is Socket null? " + (NetworkAdapter.getSocket()==null) );
         if(NetworkAdapter.hasConnection()) {
             startReadingMessage();
@@ -93,6 +92,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         else{
             toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
         }
+        */
     }
 
 
@@ -103,7 +103,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
         boardView.setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View v, DragEvent event) {
-
                 switch(event.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         break;
@@ -174,13 +173,13 @@ public class PlaceShipsActivity extends AppCompatActivity {
             }
         });
     }
-
+/*
     void startReadingMessage(){
 
           Thread readMessages = new Thread(new Runnable(){
               public void run(){
                   while(true){
-                       String msg = NetworkAdapter.readMessage();
+                      String msg = NetworkAdapter.readMessage();
                       Log.d("wifiMe", "Message received: " + msg);
                         if(msg == null){
                            //Connection lost handler
@@ -205,6 +204,48 @@ public class PlaceShipsActivity extends AppCompatActivity {
               }
           });
         readMessages.start();
+    }*/
+
+    /** No need to check if there is a connection in this method, that was done in ConnectionActivity,
+     * if it is lost, ConnectionActivity should also take care of that using listeners.
+     */
+    private void readTheirBoard(){
+        Thread readMessages = new Thread(new Runnable(){
+            public void run(){
+                int timeout = 20;
+                while(timeout > 0){
+                    String msg = NetworkAdapter.readMessage();
+                    Log.d("wifiMe", "Message received: " + msg);
+
+                    if(msg == null){
+                        toast("Waiting on other player to place their ships");
+
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        return;
+                    }
+                    else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
+                        Log.d("wifiMe", "Found board message");
+
+                        //Gets board
+                        opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
+                        Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
+                        //If you are already done placing ships, and you have received your opponent's board, then startActivity
+                    }
+                    else{
+                        toast("Opponent timed out.");
+                        //TODO: Throw some error, since message is not what we expected it to be.
+                    }
+
+                    timeout--;
+                }
+            }
+        });
+        readMessages.start();
     }
 
     /**Returns true if all ships have been placed*/
@@ -226,7 +267,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         Bundle bundle = new Bundle();
 
-
         bundle.putSerializable("gameManager", game);
         i.putExtra("gameManager", bundle);
         startActivity(i);
@@ -235,23 +275,28 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
     /**Segues to the play activity, gives information to play activity*/
     public void segueToPlayActivity(View view){
+//        donePlacingShips = true; //?
 
-        donePlacingShips = true;
+        GameManager game = null;
 
         //If there is a p2p connection
-        if(NetworkAdapter.getSocket() != null){
+        if(NetworkAdapter.getSocket().isConnected()){ //.isConnected
+            toast("Multiplayer started");
             NetworkAdapter.writeBoardMessage(playerBoard);
             Log.d("wifiMe", "Board was sent");
-            //If other player has given us their board
-            if(opponentBoard != null){
-                GameManager game =  new GameManager(playerBoard, opponentBoard);
-                segueToActivity(game);
-            }
-            else{
-                toast("Game will start when the other player places their ships");
-                return;
-            }
+
+            readTheirBoard();
+            Log.d("wifiMe", "Board was read");
+
+            game =  new GameManager(playerBoard, opponentBoard);
         }
+        else{
+            toast("Singleplayer started");
+            Log.d("wifiMe", "Not playing wifi game");
+            game = new GameManager(playerBoard);
+        }
+
+        segueToActivity(game);
 
         /** If the game is multiplayer */
         /*if(NetworkAdapter.getSocket() != null) {
@@ -270,10 +315,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }*/
-
-        Log.d("wifiMe", "Not playing wifi game");
-        GameManager game =  new GameManager(playerBoard);
-        segueToActivity(game);
     }
 
     /**Correctly scales the image and gives it a touch listener*/

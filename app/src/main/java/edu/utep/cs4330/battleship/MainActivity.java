@@ -4,10 +4,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.media.MediaPlayer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.Menu;
@@ -16,9 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.Serializable;
-
 
 import static java.lang.Thread.sleep;
 
@@ -76,7 +72,7 @@ public class MainActivity extends AppCompatActivity{
 
 
         if(NetworkAdapter.hasConnection()) {
-            startReadingNetworkMessages();
+//            startReadingNetworkMessages();
         }
         else{
             toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected

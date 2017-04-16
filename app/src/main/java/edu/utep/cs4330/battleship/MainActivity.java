@@ -55,9 +55,15 @@ public class MainActivity extends AppCompatActivity{
         }
         else{
             Bundle oldBundle = intent.getBundleExtra("gameManager");
-            game = (GameManager) oldBundle.getSerializable("gameManager");
-            if(game == null){
+            if(oldBundle == null){
                 game = new GameManager();
+            }
+            else {
+                game = (GameManager) oldBundle.getSerializable("gameManager");
+                Log.d("wifiMe", "is Game null? " + (game == null) );
+                if (game == null) {
+                    game = new GameManager();
+                }
             }
         }
 
@@ -100,7 +106,7 @@ public class MainActivity extends AppCompatActivity{
         opponentBoardView.setBoard(opponentBoard);
 
         playerBoardView.displayBoardsShips(true);
-
+        opponentBoardView.displayBoardsShips(true); //TODO REMOVE TO PREVENT CHEATING
         opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
             @Override
             public void onTouch(int x, int y){
@@ -120,7 +126,7 @@ public class MainActivity extends AppCompatActivity{
                     Log.d("wifiMe", "Message received: " + msg);
                     if(msg == null){
                         //Connection lost handler
-                        Log.d("wifiMe", "Connection Lost!");
+                        Log.d("wifiMe", "Connection Lost!, in");
                         toast("Connection Lost! Now playing single player game against computer");
                         return;
                     }
@@ -360,7 +366,6 @@ public class MainActivity extends AppCompatActivity{
                             resultsDialog(false,  game.getShipsSunkCount(game.getPlayer()) );
                         }
 
-
                         if(computerWon){
                             return;
                         }
@@ -380,6 +385,9 @@ public class MainActivity extends AppCompatActivity{
             thread.start();
     }
 
+    /**
+     * Updates the board's displays
+     * */
     public void updateBoards(){
         runOnUiThread(new Runnable() {
             @Override
@@ -472,6 +480,9 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * Shows a toast message
+     * */
     private void toast(final String s) {
         //Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
         final Context context = this;

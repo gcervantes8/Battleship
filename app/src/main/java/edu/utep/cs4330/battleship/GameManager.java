@@ -38,6 +38,7 @@ public class GameManager implements Serializable{
 
     //TODO
     GameManager(Board playerBoard, Board opponentBoard){
+        Log.d("wifiMe", "Player board is null? " + (playerBoard == null));
         player = new Player(playerBoard);
         opponent = new ComputerPlayer(opponentBoard);
         //opponent = new ComputerPlayer();

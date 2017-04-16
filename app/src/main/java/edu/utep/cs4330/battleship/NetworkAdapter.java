@@ -96,7 +96,7 @@ public class NetworkAdapter {
     static String readMessage(){
 
 
-        try {/*
+        try {
             Log.d("wifiMe", "Going to read messages part 1");
             if(in == null){
                 //Only returns null if sockets aren't set correctly
@@ -108,24 +108,19 @@ public class NetworkAdapter {
                     in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 }
             }
-*/
+
 
             Log.d("wifiMe", "Going to read messages part 2");
 
             String msg;
 
-
-            msg = in.readLine();
-            return msg;
-
-/*
             while ((msg = in.readLine()) != null) {
                 Log.d("wifiMe", "Got message");
                 if(msg.equals("") || msg.equals(" ")){ //Checking " " probably unnecessary
                     continue;
                 }
                 return msg;
-            }*/
+            }
 
         } catch (IOException e) {
             Log.d("wifiMe", "IOException ON NETWORK ADAPTER CLASS, READ MESSAGES METHOD");
@@ -147,24 +142,24 @@ public class NetworkAdapter {
         char[] tb = opponentBoard.toCharArray();
         for(int i = 0; i < b.size(); i++){
             for(int j = 0; j < b.size(); j++){
-                int shipType = tb[traverseString++];
-                Place place = b.placeAt(i, j);
+                int shipType = tb[traverseString];
+                Place place = b.placeAt(j, i);
 
-                if(shipType == 5)
+                if(shipType == '5')
                     place.setShip(new Ship("aircraftcarrier", 5));
-                else if(shipType == 4)
+                else if(shipType == '4')
                     place.setShip(new Ship("battleship", 4));
-                else if(shipType == 3)
+                else if(shipType == '3')
                     place.setShip(new Ship("submarine", 3));
-                else if(shipType == 2)
+                else if(shipType == '2')
                     place.setShip(new Ship("frigate", 2));
-                else if(shipType == 1)
+                else if(shipType == '1')
                     place.setShip(new Ship("minesweeper", 1));
                 else{
                     //Don't set a ship
                 }
 
-
+                traverseString++;
             }
         }
 
@@ -287,14 +282,14 @@ public class NetworkAdapter {
 
     public static void writeBoardMessage(Board board){
         out.println(PLACED_SHIPS + board.toString());
-
+        out.flush();
         Log.d("wifiMe", "Board being sent: " + board.toString());
     }
 
     /**Writes a place shot message, and places it in given coordinates*/
     public static void writePlaceShotMessage(int x, int y){
         out.println(PLACE_SHOT + " " + x + "," + y);
-//        out.flush();//flush clears the message you just wrote
+        out.flush();//flush clears the message you just wrote
     }
 
     public static boolean hasConnection(){

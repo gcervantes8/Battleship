@@ -28,6 +28,7 @@
 
         </activity>
         <activity
+
             android:name=".ConnectionActivity"
             android:label="@string/title_activity_connection"
             android:theme="@style/AppTheme.NoActionBar">

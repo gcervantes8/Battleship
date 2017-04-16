@@ -24,27 +24,39 @@ import java.util.List;
 
 public class PlaceShipsActivity extends AppCompatActivity {
 
-    /**The board that will be displayed so user can place ships*/
+    /**
+     * The board that will be displayed so user can place ships
+     */
     private BoardView boardView;
 
-    /**The board where ships will be placed*/
+    /**
+     * The board where ships will be placed
+     */
     private Board playerBoard;
 
-    /**The ship that is being dragged, null if no ship is being dragged*/
+    /**
+     * The ship that is being dragged, null if no ship is being dragged
+     */
     private ShipView shipBeingDragged = null;
 
-    /**Fleet of shipViews for every ship that can be added*/
+    /**
+     * Fleet of shipViews for every ship that can be added
+     */
     private List<ShipView> fleetView = new LinkedList<>();
 
-    /**Place button, which is disabled if not doing placing ships*/
+    /**
+     * Place button, which is disabled if not doing placing ships
+     */
     private Button placeButton;
 
 
-    /**Opponent's board, given by other user using network connection, if playing p2p game, otherwise is should always be null*/
+    /**
+     * Opponent's board, given by other user using network connection, if playing p2p game, otherwise is should always be null
+     */
     private Board opponentBoard = null;
 
 
-//    private boolean donePlacingShips = false;
+    private boolean donePlacingShips = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +87,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         fleetView.add(new ShipView(battleship, new Ship("battleship", 4)));
         fleetView.add(new ShipView(aircraftcarrier, new Ship("aircraftcarrier", 5)));
 
-        for(ShipView shipView: fleetView){
+        for (ShipView shipView : fleetView) {
             setShipImage(shipView);
         }
 
@@ -84,39 +96,39 @@ public class PlaceShipsActivity extends AppCompatActivity {
         setBoardDragListener(boardView, playerBoard);
 
         boardView.invalidate();
-/*
-        Log.d("wifiMe", "Is Socket null? " + (NetworkAdapter.getSocket()==null) );
-        if(NetworkAdapter.hasConnection()) {
+
+        Log.d("wifiMe", "Is Socket null? " + (NetworkAdapter.getSocket() == null));
+        if (NetworkAdapter.hasConnection()) {
             startReadingMessage();
-        }
-        else{
+        } else {
             toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
         }
-        */
+
     }
 
 
-
-    /**Sets drag listener for the board, snaps the object being dragged onto the board.
-     * Ship is also placed on the board*/
-    public void setBoardDragListener(final BoardView boardView, final Board board){
+    /**
+     * Sets drag listener for the board, snaps the object being dragged onto the board.
+     * Ship is also placed on the board
+     */
+    public void setBoardDragListener(final BoardView boardView, final Board board) {
         boardView.setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View v, DragEvent event) {
-                switch(event.getAction()) {
+                switch (event.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         break;
 
                     case DragEvent.ACTION_DRAG_ENTERED:
                         break;
 
-                    case DragEvent.ACTION_DRAG_EXITED :
+                    case DragEvent.ACTION_DRAG_EXITED:
                         break;
 
-                    case DragEvent.ACTION_DRAG_LOCATION  :
+                    case DragEvent.ACTION_DRAG_LOCATION:
                         break;
 
-                    case DragEvent.ACTION_DRAG_ENDED   :
+                    case DragEvent.ACTION_DRAG_ENDED:
                         break;
 
                     case DragEvent.ACTION_DROP:
@@ -127,176 +139,190 @@ public class PlaceShipsActivity extends AppCompatActivity {
                         int width;
                         int height;
 
-                        if(!shipBeingDragged.getShip().getDir()) {
+                        if (!shipBeingDragged.getShip().getDir()) {
                             width = shipBeingDragged.getShipImage().getHeight();
                             height = shipBeingDragged.getShipImage().getWidth();
 
-                        }else{
+                        } else {
                             width = shipBeingDragged.getShipImage().getWidth();
                             height = shipBeingDragged.getShipImage().getHeight();
                         }
 
                         //x and y coordinates of top-left of image, relative to the board
-                        float boardX = x - (width/2);
-                        float boardY = y - (height/2);
+                        float boardX = x - (width / 2);
+                        float boardY = y - (height / 2);
 
                         int xy = boardView.locatePlace(boardX, boardY);
-                        if(xy == -1){
+                        if (xy == -1) {
                             return true;
                         }
-                        int xGrid =  xy/100;
-                        int yGrid =  xy%100;
+                        int xGrid = xy / 100;
+                        int yGrid = xy % 100;
 
-                        if(!board.placeShip(shipBeingDragged.getShip(), xGrid, yGrid, shipBeingDragged.getShip().getDir())){
+                        if (!board.placeShip(shipBeingDragged.getShip(), xGrid, yGrid, shipBeingDragged.getShip().getDir())) {
                             return true;
                         }
 
-                        if(!shipBeingDragged.getShip().getDir()) {
-                            shipBeingDragged.getShipImage().setX(v.getX() + (xGrid*(v.getWidth()/10)) - (height/2) + (width/2));
-                            shipBeingDragged.getShipImage().setY(v.getY() + (yGrid*(v.getHeight()/10)) + (height/2) - (width/2));
+                        if (!shipBeingDragged.getShip().getDir()) {
+                            shipBeingDragged.getShipImage().setX(v.getX() + (xGrid * (v.getWidth() / 10)) - (height / 2) + (width / 2));
+                            shipBeingDragged.getShipImage().setY(v.getY() + (yGrid * (v.getHeight() / 10)) + (height / 2) - (width / 2));
 
-                        }else{
-                            shipBeingDragged.getShipImage().setX(v.getX() + (xGrid*(v.getWidth()/10)));
-                            shipBeingDragged.getShipImage().setY(v.getY() + (yGrid*(v.getHeight()/10)));
+                        } else {
+                            shipBeingDragged.getShipImage().setX(v.getX() + (xGrid * (v.getWidth() / 10)));
+                            shipBeingDragged.getShipImage().setY(v.getY() + (yGrid * (v.getHeight() / 10)));
                         }
 
 
                         boardView.invalidate();
-                        if(allShipsPlaced()){
+                        if (allShipsPlaced()) {
                             enablePlaceButton(true);
                         }
                         break;
 
-                    default: break;
+                    default:
+                        break;
                 }
                 return true;
             }
         });
     }
-/*
-    void startReadingMessage(){
 
-          Thread readMessages = new Thread(new Runnable(){
-              public void run(){
-                  while(true){
-                      String msg = NetworkAdapter.readMessage();
-                      Log.d("wifiMe", "Message received: " + msg);
-                        if(msg == null){
-                           //Connection lost handler
-                            Log.d("wifiMe", "Connection Lost!");
-                            toast("Connection Lost! Now playing single player game against computer");
-                            return;
-                        }
-                       else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
-                            Log.d("wifiMe", "Found board message");
-                            //Gets board
-                            opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
-                            Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
-                            //If you are already done placing ships, and you have received your opponent's board, then startActivity
-                            if(donePlacingShips){
-                                GameManager game = new GameManager(playerBoard, opponentBoard);
-                                segueToActivity(game);
-                            }
-                       }
+    void startReadingMessage() {
 
-
-                  }
-              }
-          });
-        readMessages.start();
-    }*/
-
-    /** No need to check if there is a connection in this method, that was done in ConnectionActivity,
-     * if it is lost, ConnectionActivity should also take care of that using listeners.
-     */
-    private void readTheirBoard(){
-        Thread readMessages = new Thread(new Runnable(){
-            public void run(){
-                int timeout = 20;
-                while(timeout > 0){
+        Thread readMessages = new Thread(new Runnable() {
+            public void run() {
+                while (true) {
                     String msg = NetworkAdapter.readMessage();
                     Log.d("wifiMe", "Message received: " + msg);
-
-                    if(msg == null){
-                        toast("Waiting on other player to place their ships");
-
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
+                    if (msg == null) {
+                        //Connection lost handler
+                        Log.d("wifiMe", "Connection Lost!");
+                        toast("Connection Lost! Now playing single player game against computer");
+                        Log.d("wifiMe", "Has connection? " + NetworkAdapter.hasConnection());
                         return;
-                    }
-                    else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
+                    } else if (msg.startsWith(NetworkAdapter.PLACED_SHIPS)) {
                         Log.d("wifiMe", "Found board message");
+
 
                         //Gets board
                         opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
                         Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
                         //If you are already done placing ships, and you have received your opponent's board, then startActivity
-                    }
-                    else{
-                        toast("Opponent timed out.");
-                        //TODO: Throw some error, since message is not what we expected it to be.
+                        if (donePlacingShips) {
+                            GameManager game = new GameManager(playerBoard, opponentBoard);
+                            segueToActivity(game);
+                        }
                     }
 
-                    timeout--;
+
                 }
             }
         });
         readMessages.start();
     }
 
-    /**Returns true if all ships have been placed*/
-    public boolean allShipsPlaced(){
-        for(ShipView ship: fleetView){
-            if(ship.getShip() == null){
+    /**
+     * No need to check if there is a connection in this method, that was done in ConnectionActivity,
+     * if it is lost, ConnectionActivity should also take care of that using listeners.
+     */
+    /*private void readTheirBoard() {
+
+        int timeout = 20;
+        while (timeout > 0) {
+            String msg = NetworkAdapter.readMessage();
+            Log.d("wifiMe", "Message received: " + msg);
+
+            if (msg == null) {
+                toast("Waiting on other player to place their ships");
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                return;
+            } else if (msg.startsWith(NetworkAdapter.PLACED_SHIPS)) {
+                Log.d("wifiMe", "Found board message");
+
+                //Gets board
+                opponentBoard = NetworkAdapter.decipherPlaceShips(msg);
+                Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
+                //If you are already done placing ships, and you have received your opponent's board, then startActivity
+            } else {
+                toast("Opponent timed out.");
+                //TODO: Throw some error, since message is not what we expected it to be.
+            }
+
+            timeout--;
+        }
+    }*/
+
+
+    /**
+     * Returns true if all ships have been placed
+     */
+    public boolean allShipsPlaced() {
+        for (ShipView ship : fleetView) {
+            if (ship.getShip() == null) {
                 return false;
             }
 
-          if(!ship.getShip().isPlaced()){
-              return false;
-          }
+            if (!ship.getShip().isPlaced()) {
+                return false;
+            }
         }
         return true;
     }
 
-    public void segueToActivity(GameManager game){
-        Intent i = new Intent(this, MainActivity.class);
+    public void segueToActivity(final GameManager game) {
+        final PlaceShipsActivity activity = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(activity, MainActivity.class);
 
-        Bundle bundle = new Bundle();
+                Bundle bundle = new Bundle();
 
-        bundle.putSerializable("gameManager", game);
-        i.putExtra("gameManager", bundle);
-        startActivity(i);
+                bundle.putSerializable("gameManager", game);
+                i.putExtra("gameManager", bundle);
+                startActivity(i);
+            }
+        });
+
 
     }
 
-    /**Segues to the play activity, gives information to play activity*/
-    public void segueToPlayActivity(View view){
+    /**
+     * Segues to the play activity, gives information to play activity
+     */
+    /*public void segueToPlayActivity(View view) {
 //        donePlacingShips = true; //?
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                GameManager game;
 
-        GameManager game = null;
+                //If there is a p2p connection
+                if (NetworkAdapter.getSocket().isConnected()) { //.isConnected
+                    toast("Multiplayer started");
+                    NetworkAdapter.writeBoardMessage(playerBoard);
+                    Log.d("wifiMe", "Board was sent");
 
-        //If there is a p2p connection
-        if(NetworkAdapter.getSocket().isConnected()){ //.isConnected
-            toast("Multiplayer started");
-            NetworkAdapter.writeBoardMessage(playerBoard);
-            Log.d("wifiMe", "Board was sent");
+                    //readTheirBoard();
+                    Log.d("wifiMe", "Board was read");
 
-            readTheirBoard();
-            Log.d("wifiMe", "Board was read");
+                    game = new GameManager(playerBoard, opponentBoard);
+                } else {
+                    toast("Singleplayer started");
+                    Log.d("wifiMe", "Not playing wifi game");
+                    game = new GameManager(playerBoard);
+                }
 
-            game =  new GameManager(playerBoard, opponentBoard);
-        }
-        else{
-            toast("Singleplayer started");
-            Log.d("wifiMe", "Not playing wifi game");
-            game = new GameManager(playerBoard);
-        }
+                segueToActivity(game);
+            }
+        }).start();
 
-        segueToActivity(game);
 
         /** If the game is multiplayer */
         /*if(NetworkAdapter.getSocket() != null) {
@@ -309,22 +335,60 @@ public class PlaceShipsActivity extends AppCompatActivity {
             }).start();
         }*/
 
-        /** Attempt to get their board, error should be thrown if player takes too long, or there was a connection error */
+    // Attempt to get their board, error should be thrown if player takes too long, or there was a connection error */
         /*try {
             game.setOpponentBoard(NetworkAdapter.readTheirBoard(this));
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }*/
+    //}
+
+
+    /**
+     * Segues to the play activity, gives information to play activity
+     */
+    public void segueToPlayActivity(View view) {
+
+        donePlacingShips = true;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //If there is a p2p connection
+                if (NetworkAdapter.getSocket() != null) {
+                    NetworkAdapter.writeBoardMessage(playerBoard);
+                    Log.d("wifiMe", "Board was sent");
+                    //If other player has given us their board
+                    if (opponentBoard != null) {
+                        GameManager game = new GameManager(playerBoard, opponentBoard);
+                        segueToActivity(game);
+                    } else {
+                        toast("Game will start when the other player places their ships");
+                        return;
+                    }
+                }
+                Log.d("wifiMe", "Not playing wifi game");
+                GameManager game = new GameManager(playerBoard);
+                segueToActivity(game);
+            }
+        }).start();
+
+
     }
 
-    /**Correctly scales the image and gives it a touch listener*/
-    private void setShipImage(final ShipView shipView){
+
+    /**
+     * Correctly scales the image and gives it a touch listener
+     */
+    private void setShipImage(final ShipView shipView) {
         setImageScaling(shipView.getShipImage());
         setTouchListener(shipView);
     }
 
-    /**Gives a touch listener to the image for dragging*/
-    private void setTouchListener(final ShipView shipView){
+    /**
+     * Gives a touch listener to the image for dragging
+     */
+    private void setTouchListener(final ShipView shipView) {
         final ImageView image = shipView.getShipImage();
         image.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -375,8 +439,10 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
-    /**Rotates the ship and then places the ship in the middle of the screen*/
-    public void rotateButtonTapped(View v){
+    /**
+     * Rotates the ship and then places the ship in the middle of the screen
+     */
+    public void rotateButtonTapped(View v) {
         ShipView shipToRotate = findSelectedShip();
         rotateShip(shipToRotate);
 
@@ -384,12 +450,12 @@ public class PlaceShipsActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
-        shipToRotate.getShipImage().setX(width/3+10);
-        shipToRotate.getShipImage().setY((height/4)-20);
+        shipToRotate.getShipImage().setX(width / 3 + 10);
+        shipToRotate.getShipImage().setY((height / 4) - 20);
 
         enablePlaceButton(false);
 
-        if(shipToRotate.getShip() != null) {
+        if (shipToRotate.getShip() != null) {
             for (Place place : shipToRotate.getShip().getPlacement()) {
                 place.setShip(null);
             }
@@ -401,57 +467,65 @@ public class PlaceShipsActivity extends AppCompatActivity {
         boardView.invalidate();
     }
 
-    private void enablePlaceButton(Boolean enable){
-        if(enable){
+    private void enablePlaceButton(Boolean enable) {
+        if (enable) {
             placeButton.setEnabled(true);
             placeButton.setTextColor(Color.WHITE);
-            placeButton.setBackgroundColor(Color.rgb(102,153,0));
-        }
-        else{
-            placeButton.setBackgroundColor(Color.rgb(75,120,30));
-            placeButton.setTextColor(Color.rgb(115,115,115));
+            placeButton.setBackgroundColor(Color.rgb(102, 153, 0));
+        } else {
+            placeButton.setBackgroundColor(Color.rgb(75, 120, 30));
+            placeButton.setTextColor(Color.rgb(115, 115, 115));
             placeButton.setEnabled(false);
         }
     }
 
-    /**Finds the ship that has a selected image*/
-    private ShipView findSelectedShip(){
-        for(ShipView shipView: fleetView){
-            if(shipView.isSelected()){
+    /**
+     * Finds the ship that has a selected image
+     */
+    private ShipView findSelectedShip() {
+        for (ShipView shipView : fleetView) {
+            if (shipView.isSelected()) {
                 return shipView;
             }
         }
         return null;
     }
 
-    /**Rotates the ship*/
-    private void rotateShip(ShipView shipToRotate){
-        if(shipToRotate.getShip().getDir()){
+    /**
+     * Rotates the ship
+     */
+    private void rotateShip(ShipView shipToRotate) {
+        if (shipToRotate.getShip().getDir()) {
             shipToRotate.getShipImage().setRotation(90);
             shipToRotate.getShip().setDir(false);
-        }
-        else{
+        } else {
             shipToRotate.getShipImage().setRotation(0);
             shipToRotate.getShip().setDir(true);
         }
     }
 
-    /**Selects the image, image needs to be selected for rotation*/
-    public void select(ShipView shipView){
+    /**
+     * Selects the image, image needs to be selected for rotation
+     */
+    public void select(ShipView shipView) {
         shipView.setSelected(true);
         shipView.getShipImage().setBackgroundColor(Color.GREEN);
     }
 
-    /**Deselects all of the images*/
-    public void deselectAllShipViews(){
-        for(ShipView shipView: fleetView){
+    /**
+     * Deselects all of the images
+     */
+    public void deselectAllShipViews() {
+        for (ShipView shipView : fleetView) {
             shipView.setSelected(false);
             shipView.getShipImage().setBackgroundColor(Color.TRANSPARENT);
         }
     }
 
-    /**Scales the image to have the same height as a tile on the boardView*/
-    private void setImageScaling(final ImageView image){
+    /**
+     * Scales the image to have the same height as a tile on the boardView
+     */
+    private void setImageScaling(final ImageView image) {
 
         image.setAdjustViewBounds(true);
 
@@ -461,7 +535,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
             @Override
             public void onGlobalLayout() {
 
-                image.setMaxHeight(boardView.getMeasuredHeight()/10);
+                image.setMaxHeight(boardView.getMeasuredHeight() / 10);
             }
 
         });

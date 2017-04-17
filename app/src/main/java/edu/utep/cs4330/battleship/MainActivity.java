@@ -75,10 +75,10 @@ public class MainActivity extends AppCompatActivity{
 
         //Gives board references to the BoardViews
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
-
+        updateTurnDisplay();
 
         if(NetworkAdapter.hasConnection()) {
-//            startReadingNetworkMessages();
+            startReadingNetworkMessages();
         }
         else{
             toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity{
                 while(true){
                     String msg = NetworkAdapter.readMessage();
                     Log.d("wifiMe", "Message received: " + msg);
+                    Log.d("wifiMe", msg);
                     if(msg == null){
                         //Connection lost handler
                         Log.d("wifiMe", "Connection Lost!, in");
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity{
                     else if(msg.startsWith(NetworkAdapter.NEW_GAME)){
                         Log.d("wifiMe", "New game requested, but we will ignore");
                     }
-                    else if(msg.startsWith(NetworkAdapter.PLACE_SHOT)){
+                    else if(msg.contains(NetworkAdapter.PLACE_SHOT)){
                         Log.d("wifiMe", "Place was shot message received, message: " + msg);
                         int[] placeShot = NetworkAdapter.decipherPlaceShot(msg);
                         if(placeShot == null){
@@ -220,7 +221,7 @@ public class MainActivity extends AppCompatActivity{
     /**Called when board was touched
      * @param x is the x-coordinate of the square that was touched, 0-based index
      * @param y is the y-coordinate of the square that was touched, 0-based index*/
-    public void boardTouched(int x, int y) {
+    public void boardTouched(final int x, final int y) {
 
         Place placeToHit = game.getOpponentPlayer().getBoard().placeAt(x, y);
 
@@ -252,16 +253,27 @@ public class MainActivity extends AppCompatActivity{
 
         updateBoards();
         boolean playerWon = game.getOpponentPlayer().areAllShipsSunk();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(NetworkAdapter.hasConnection()) {
+                    Log.d("wifiMe", "Wrote message to opponent for placing shot");
+                    NetworkAdapter.writePlaceShotMessage(x, y);
+                }
+            }
+        }).start();
+
         if(playerWon){
             updateWinDisplay(true);
             resultsDialog(true, game.getShipsSunkCount(game.getPlayer()) );
             return;
         }
 
-        if(NetworkAdapter.hasConnection()){
-            NetworkAdapter.writePlaceShotMessage(x, y);
-        }else {
 
+
+        if(!NetworkAdapter.hasConnection()){
+            Log.d("wifiMe", "BROKEN - COMPUTER");
             boolean isComputersTurn = game.getActivePlayer() != game.getPlayer();
             if (isComputersTurn) {
                 computerTurn();
@@ -306,7 +318,7 @@ public class MainActivity extends AppCompatActivity{
         Place placeToHit = game.getPlayer().getBoard().placeAt(x, y);
 
         game.hitPlace(x, y);
-
+        updateBoards();
 
         //If place we hit had a ship
         if(placeToHit.hasShip()){
@@ -319,7 +331,7 @@ public class MainActivity extends AppCompatActivity{
             playSound(R.raw.miss);
         }
 
-        updateBoards();
+
         boolean p2pOpponentWon = game.getPlayer().areAllShipsSunk();
         if(p2pOpponentWon){
             updateWinDisplay(false);

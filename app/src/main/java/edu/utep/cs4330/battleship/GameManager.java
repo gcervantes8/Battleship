@@ -37,12 +37,16 @@ public class GameManager implements Serializable{
     }
 
     //TODO
-    GameManager(Board playerBoard, Board opponentBoard){
+    GameManager(Board playerBoard, Board opponentBoard, boolean playerTurn){
+
         Log.d("wifiMe", "Player board is null? " + (playerBoard == null));
         player = new Player(playerBoard);
         opponent = new ComputerPlayer(opponentBoard);
         //opponent = new ComputerPlayer();
         activePlayer = player;
+        if(playerTurn){
+            changeTurn();
+        }
     }
 
     /**Retrieves from given player's board how many ships they have sunk

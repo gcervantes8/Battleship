@@ -198,29 +198,6 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
     }
 
-    /*public void createServer() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int port = 8000;
-                while (true) {
-                    port++;
-                    try {
-                        ServerSocket server = new ServerSocket(port);
-//                        serverSocket = server;
-                        Log.d("wifiMe", "Found available port: " + port);
-                        server.accept();
-                        return;
-
-                    } catch (IOException e) {
-                        //Bad port, goes through while loop to try another port
-                    }
-                }
-            }
-        }).start();
-
-    }*/
 
     /**
      * Called when p2p wifi is enabled/disabled

@@ -58,6 +58,8 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
     private boolean donePlacingShips = false;
 
+    private Thread readMessages;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,18 +191,25 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
     void startReadingMessage() {
 
-        Thread readMessages = new Thread(new Runnable() {
+        readMessages = new Thread(new Runnable() {
             public void run() {
                 while (true) {
                     String msg = NetworkAdapter.readMessage();
-                    Log.d("wifiMe", "Message received: " + msg);
+                    Log.d("wifiMe", "Message received IN PLACE SHIP ACTIVITY: " + msg);
+
                     if (msg == null) {
                         //Connection lost handler
                         Log.d("wifiMe", "Connection Lost!");
                         toast("Connection Lost! Now playing single player game against computer");
                         Log.d("wifiMe", "Has connection? " + NetworkAdapter.hasConnection());
                         return;
-                    } else if (msg.startsWith(NetworkAdapter.PLACED_SHIPS)) {
+                    }
+                    else if(msg.contains(NetworkAdapter.STOP_READING)){
+                        //Thread.currentThread().interrupt();
+                        return;
+                        //return;
+                    }
+                    else if (msg.startsWith(NetworkAdapter.PLACED_SHIPS)) {
                         Log.d("wifiMe", "Found board message");
 
 
@@ -209,8 +218,13 @@ public class PlaceShipsActivity extends AppCompatActivity {
                         Log.d("wifiMe", "Decipher done"); //Why does it sometimes not reach this message, if donePlacingShips is true?
                         //If you are already done placing ships, and you have received your opponent's board, then startActivity
                         if (donePlacingShips) {
-                            GameManager game = new GameManager(playerBoard, opponentBoard);
+                            //readMessages.interrupt();
+                            NetworkAdapter.writeStopReadingMessage();
+
+                            GameManager game = new GameManager(playerBoard, opponentBoard, true);
                             segueToActivity(game);
+
+                            return;
                         }
                     }
 
@@ -293,56 +307,6 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Segues to the play activity, gives information to play activity
-     */
-    /*public void segueToPlayActivity(View view) {
-//        donePlacingShips = true; //?
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GameManager game;
-
-                //If there is a p2p connection
-                if (NetworkAdapter.getSocket().isConnected()) { //.isConnected
-                    toast("Multiplayer started");
-                    NetworkAdapter.writeBoardMessage(playerBoard);
-                    Log.d("wifiMe", "Board was sent");
-
-                    //readTheirBoard();
-                    Log.d("wifiMe", "Board was read");
-
-                    game = new GameManager(playerBoard, opponentBoard);
-                } else {
-                    toast("Singleplayer started");
-                    Log.d("wifiMe", "Not playing wifi game");
-                    game = new GameManager(playerBoard);
-                }
-
-                segueToActivity(game);
-            }
-        }).start();
-
-
-        /** If the game is multiplayer */
-        /*if(NetworkAdapter.getSocket() != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    NetworkAdapter.setMyBoard(playerBoard);
-                    NetworkAdapter.sendMyBoard();
-                }
-            }).start();
-        }*/
-
-    // Attempt to get their board, error should be thrown if player takes too long, or there was a connection error */
-        /*try {
-            game.setOpponentBoard(NetworkAdapter.readTheirBoard(this));
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }*/
-    //}
-
 
     /**
      * Segues to the play activity, gives information to play activity
@@ -360,16 +324,19 @@ public class PlaceShipsActivity extends AppCompatActivity {
                     Log.d("wifiMe", "Board was sent");
                     //If other player has given us their board
                     if (opponentBoard != null) {
-                        GameManager game = new GameManager(playerBoard, opponentBoard);
+                        NetworkAdapter.writeStopReadingMessage();
+                        GameManager game = new GameManager(playerBoard, opponentBoard, false);
                         segueToActivity(game);
                     } else {
                         toast("Game will start when the other player places their ships");
                         return;
                     }
                 }
-                Log.d("wifiMe", "Not playing wifi game");
-                GameManager game = new GameManager(playerBoard);
-                segueToActivity(game);
+                else {
+                    Log.d("wifiMe", "Not playing wifi game");
+                    GameManager game = new GameManager(playerBoard);
+                    segueToActivity(game);
+                }
             }
         }).start();
 

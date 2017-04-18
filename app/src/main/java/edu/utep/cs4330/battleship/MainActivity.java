@@ -146,11 +146,12 @@ public class MainActivity extends AppCompatActivity {
 
         Thread readMessages = new Thread(new Runnable() {
             public void run() {
-                try {
+                /*try {
                     sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
+                
                 while (true) {
                     String msg = NetworkAdapter.readMessage();
                     Log.d("wifiMe", "Message received: " + msg);
@@ -177,7 +178,13 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                NetworkAdapter.writeRejectNewGameMessage();
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        NetworkAdapter.writeRejectNewGameMessage();
+                                    }
+                                }).start();
+
                             }
                         });
                     } else if (msg.startsWith(NetworkAdapter.REJECT_NEW_GAME_REQUEST)) {

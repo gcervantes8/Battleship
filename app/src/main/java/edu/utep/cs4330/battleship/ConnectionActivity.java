@@ -240,8 +240,6 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                     @Override
                     public void onSuccess() {
                         toast("Wi-fi direct connection established.");
-
-
                     }
 
 

@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#2B2B2B"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="edu.utep.cs4330.battleship.ConnectionActivity"
     tools:showIn="@layout/activity_connection">
@@ -34,14 +35,19 @@
 
     <Button
         android:id="@+id/Connect"
+        style="@android:style/Widget.Holo.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_dark"
         android:onClick="connect"
         android:text="Connect" />
 
     <Spinner
         android:id="@+id/DeviceSpinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:theme="?android:attr/listViewWhiteStyle" />
 
 </LinearLayout>

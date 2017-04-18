@@ -4,6 +4,7 @@
     <string name="title_activity_place_ships">PlaceShipsActivity</string>
     <string name="smart_opponent">Smart Opponent</string>
     <string name="random_opponent">Random Opponent</string>
+    <string name="wifi_p2p_opponent">Wifi Direct Opponent</string>
     <string name="opponent_select">Select Opponent</string>
     <string name="reset_game_title">Reset game</string>
     <string name="reset_game_prompt">Are you sure you want to restart the current game?</string>
@@ -15,7 +16,6 @@
     <string name="enable_sound">Enable Sound</string>
     <string name="disable_sound">Disable Sound</string>
     <string name="rotate_ship">Rotate Ship</string>
-
     <string name="winner_title">Winner!</string>
     <string name="loser_title">Loser!</string>
     <string name="winner_description">You have beaten the game by sinking all of the ships! \n\n You sunk all </string>

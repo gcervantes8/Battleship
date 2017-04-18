@@ -197,7 +197,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
             public void run() {
 
                 try {
-                    sleep(2000); //Waits 2 seconds before starting to read messages, done to ensure stopReadingMessages is taken and applied to correct thread.
+                    sleep(1000); //Waits 1 seconds before starting to read messages, done to ensure stopReadingMessages is taken and applied to correct thread.
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -230,7 +230,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
                             GameManager game = new GameManager(playerBoard, opponentBoard, true);
                             segueToActivity(game);
 
-                            return;
+                            //return;
                         }
                     }
 
@@ -417,8 +417,9 @@ public class PlaceShipsActivity extends AppCompatActivity {
      */
     public void rotateButtonTapped(View v) {
         ShipView shipToRotate = findSelectedShip();
-        rotateShip(shipToRotate);
-
+        if(shipToRotate != null) {
+            rotateShip(shipToRotate);
+        }
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int height = displayMetrics.heightPixels;

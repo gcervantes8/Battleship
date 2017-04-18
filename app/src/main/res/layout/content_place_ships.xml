@@ -17,7 +17,7 @@
         android:layout_alignEnd="@+id/placeShipsBoardView"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/placeShipsBoardView"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="22dp"
         android:background="@android:color/holo_green_dark"
         android:elevation="6dp"
         android:onClick="segueToPlayActivity"
@@ -32,6 +32,7 @@
 
     <Button
         android:id="@+id/rotateShip"
+        style="@android:style/Widget.Holo.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/placeButton"
@@ -39,7 +40,7 @@
         android:layout_alignRight="@+id/placeButton"
         android:layout_alignStart="@+id/placeButton"
         android:layout_below="@+id/placeButton"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="16dp"
         android:background="@android:color/holo_green_dark"
         android:onClick="rotateButtonTapped"
         android:paddingBottom="5dp"
@@ -48,7 +49,8 @@
         android:paddingRight="5dp"
         android:paddingStart="5dp"
         android:paddingTop="5dp"
-        android:text="@string/rotate_ship" />
+        android:text="@string/rotate_ship"
+        android:textColor="@android:color/background_light" />
 
     <edu.utep.cs4330.battleship.BoardView
         android:id="@+id/placeShipsBoardView"

@@ -40,8 +40,6 @@ public class NetworkAdapter {
 
     static final String STOP_READING = "STOP READING";
 
-    public static boolean shouldThereBeAConnection;
-
     //Methods accessed statically, prevents objects from being created to avoid confusion
     private NetworkAdapter(){}
 
@@ -102,7 +100,6 @@ public class NetworkAdapter {
      * }
      * */
     static String readMessage(){
-
 
         try {
             Log.d("wifiMe", "Going to read messages part 1");
@@ -206,81 +203,6 @@ public class NetworkAdapter {
 
         return coordinatesShot;
     }
-
-    /*public static void setMyBoard(Board x){
-        myBoard = x;
-    }
-
-    public static void sendMyBoard(){
-        String toSend = myBoard.toString();
-
-        //Add trailing symbol to show its the of the board (nvm)
-//        toSend += "f";
-        out.write(toSend);
-    }*/
-
-    /** Should only be called once, per game connection */
-    /*public static Board readTheirBoard(final Activity ctx) throws IOException, InterruptedException {
-        int timeout = 20;
-        String theirBoard = "";
-        while(timeout > 0){
-
-            // Try to read their board
-            theirBoard = in.readLine();
-
-            if(!theirBoard.isEmpty()){
-                // Got board, done and break
-                break;
-            }
-            else{
-                ctx.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(ctx, "Waiting on opponent...\nPlease don't quit app.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-            // Sleep for same amount as toast duration to allow time for opponent to send their board
-            //  (LENGTH_SHORT is 2000ms
-            //
-            Thread.sleep(2000);
-
-            timeout--;
-
-            // TODO: Add this feature
-            if(timeout == 0){
-                //Throw some error (or restart the activity entirely)
-            }
-        }
-
-        // Begin parsing the string into a board
-        Board b = new Board(myBoard.size());
-        int traverseString = 0;
-        char[] tb = theirBoard.toCharArray();
-        for(int i = 0; i < b.size(); i++){
-            for(int j = 0; j < b.size(); j++){
-                int shipType = tb[traverseString++];
-                Place place = b.placeAt(i, j);
-
-                if(shipType == 5)
-                    place.setShip(new Ship("aircraftcarrier", 5));
-                else if(shipType == 4)
-                    place.setShip(new Ship("battleship", 4));
-                else if(shipType == 3)
-                    place.setShip(new Ship("submarine", 3));
-                else if(shipType == 2)
-                    place.setShip(new Ship("frigate", 2));
-                else if(shipType == 1)
-                    place.setShip(new Ship("minesweeper", 1));
-                else{
-                    //do nothing, no ship in Place
-                }
-
-            }
-        }
-
-        return b;
-    }*/
 
     /**Writes message*/
     public static void writeMessage(String msg){

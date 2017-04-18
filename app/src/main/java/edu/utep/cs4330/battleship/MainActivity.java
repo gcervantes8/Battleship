@@ -549,9 +549,7 @@ public class MainActivity extends AppCompatActivity{
                 }
                 return true;
             case R.id.menu:
-                /*if(NetworkAdapter.hasConnection()){ //add?
-                    NetworkAdapter.writeStopReadingMessage();
-                }*/
+                
                 finish();
                 Intent i = new Intent(this, MainMenu.class);
                 startActivity(i);

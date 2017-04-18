@@ -29,6 +29,12 @@ public class NetworkAdapter {
     /**Message constant, Sent or received when a player requests to play a new game*/
     static final String NEW_GAME = "NEW GAME REQUEST";
 
+    /**Message constant, representing when you accept a new game request*/
+    static final String ACCEPT_NEW_GAME_REQUEST = "ACCEPTED NEW GAME REQUEST";
+
+    /**Message constant, representing when you reject a new game request*/
+    static final String REJECT_NEW_GAME_REQUEST = "REJECT NEW GAME REQUEST";
+
     /**Message constant, Sent or received when a place has been shot, message sent usually contains coordinates in the format of "PLACE SHOT 3,5"*/
     static final String PLACE_SHOT = "PLACE SHOT";
 
@@ -296,6 +302,21 @@ public class NetworkAdapter {
 
     static void writeStopReadingMessage(){
         out.println(STOP_READING + " ");
+        out.flush();
+    }
+
+    static void writeNewGameMessage(){
+        out.println(NEW_GAME + " ");
+        out.flush();
+    }
+
+    static void writeAcceptNewGameMessage(){
+        out.println(ACCEPT_NEW_GAME_REQUEST + " ");
+        out.flush();
+    }
+
+    static void writeRejectNewGameMessage(){
+        out.println(REJECT_NEW_GAME_REQUEST + " ");
         out.flush();
     }
 

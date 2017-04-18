@@ -1,6 +1,7 @@
 package edu.utep.cs4330.battleship;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity{
         //Restores Game State for after an orientation happens
         game = (GameManager) savedInstanceState.getSerializable("game");
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
+        updateTurnDisplay();
     }
 
     @Override
@@ -144,8 +146,36 @@ public class MainActivity extends AppCompatActivity{
                         Log.d("wifiMe", "Received place ships message?? Shouldn't have found one, debug");
                     }
                     else if(msg.startsWith(NetworkAdapter.NEW_GAME)){
-                        Log.d("wifiMe", "New game requested, but we will ignore");
+                        Log.d("wifiMe", "New game requested"); //should send accept message message and reset game
+                        resetPromptDialog(getString(R.string.reset_game_connected_prompt),  new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                NetworkAdapter.writeAcceptNewGameMessage();
+
+                                if(NetworkAdapter.hasConnection()){
+                                    NetworkAdapter.writeStopReadingMessage();
+                                }
+                                segueToPlaceShipsActivity();
+                            }
+                        }, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                NetworkAdapter.writeRejectNewGameMessage();
+                            }
+                        });
                     }
+                    else if(msg.startsWith(NetworkAdapter.REJECT_NEW_GAME_REQUEST)){
+                        toast("New game request rejected  by other player");
+                    }
+                    else if(msg.startsWith(NetworkAdapter.ACCEPT_NEW_GAME_REQUEST)){
+                        Log.d("wifiMe", "Accepted new game request"); //should send accept message message
+
+                        if(NetworkAdapter.hasConnection()){
+                            NetworkAdapter.writeStopReadingMessage();
+                        }
+                        segueToPlaceShipsActivity();
+                    }
+                    /*else if(msg.contains(NetworkAdapter.STOP_READING)){
+                        return;
+                    }*/
                     else if(msg.contains(NetworkAdapter.PLACE_SHOT)){
                         Log.d("wifiMe", "Place was shot message received, message: " + msg);
                         int[] placeShot = NetworkAdapter.decipherPlaceShot(msg);
@@ -166,36 +196,49 @@ public class MainActivity extends AppCompatActivity{
 
     /**Resets game when button was tapped*/
     public void resetGame(View view){
-
-        //Doesn't ask user to reset the game if game is over or no shots have been made to the board
-        if(game.getActivePlayer().getBoard().numOfShots() == 0  || game.getActivePlayer().areAllShipsSunk()){
-            resetGame();
-            return;
+        if(NetworkAdapter.hasConnection()){
+            NetworkAdapter.writeNewGameMessage();
+            toast("New game will start when other player accepts request");
         }
-        resetPromptDialog();
+        //Doesn't ask user to reset the game if game is over or no shots have been made to the board
+        else if(game.getActivePlayer().getBoard().numOfShots() == 0  || game.getActivePlayer().areAllShipsSunk()){
+            resetGame();
+        }
+        else{
+            resetPromptDialog(getString(R.string.reset_game_prompt), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    resetGame();
+                }
+            }, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+        }
+
     }
 
     /**AlertDialog is used to display a dialog, the dialog asks the user if they want to reset the game.
      * Game is reset if user taps on yes*/
-    public void resetPromptDialog(){
-        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-        alertDialog.setTitle(getString(R.string.reset_game_title));
-        alertDialog.setMessage(getString(R.string.reset_game_prompt));
+    public void resetPromptDialog(final String message, final DialogInterface.OnClickListener acceptListener, final DialogInterface.OnClickListener rejectListener){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle(getString(R.string.reset_game_title));
+                alertDialog.setMessage(message);//(getString(R.string.reset_game_prompt)
 
-        //Yes button, and listener for if button is pressed
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "YES", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                resetGame();
+                //Yes button, and listener for if button is pressed
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "YES", acceptListener);
+
+                //No button
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "NO", rejectListener);
+                alertDialog.show();
             }
         });
 
-        //No button
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "NO", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        alertDialog.show();
     }
+
+
 
     /**Resets game*/
     public void resetGame(){
@@ -349,6 +392,18 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+    /**Goes back to placeShipsActivity so that the user can start placing their ships again*/
+    private void segueToPlaceShipsActivity(){
+        final Context activity = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(activity, PlaceShipsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
     /**Takes care of computer shooting the board.
      * Shoots board, checks if ship was hit or sunk.*/
     public void computerTurn(){
@@ -494,6 +549,9 @@ public class MainActivity extends AppCompatActivity{
                 }
                 return true;
             case R.id.menu:
+                /*if(NetworkAdapter.hasConnection()){ //add?
+                    NetworkAdapter.writeStopReadingMessage();
+                }*/
                 finish();
                 Intent i = new Intent(this, MainMenu.class);
                 startActivity(i);

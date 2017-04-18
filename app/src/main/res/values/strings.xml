@@ -7,6 +7,8 @@
     <string name="opponent_select">Select Opponent</string>
     <string name="reset_game_title">Reset game</string>
     <string name="reset_game_prompt">Are you sure you want to restart the current game?</string>
+    <string name="reset_game_request_prompt">Request to other player to start a new game?</string>
+    <string name="reset_game_connected_prompt">Other player requested to play new game, accept request?</string>
     <string name="new_game">New</string>
     <string name="place_ships">Place ships</string>
     <string name="strategy">Random Opponent</string>

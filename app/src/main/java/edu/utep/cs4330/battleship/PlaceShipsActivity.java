@@ -22,6 +22,8 @@ import android.widget.Toast;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
+
 public class PlaceShipsActivity extends AppCompatActivity {
 
     /**
@@ -193,6 +195,12 @@ public class PlaceShipsActivity extends AppCompatActivity {
 
         readMessages = new Thread(new Runnable() {
             public void run() {
+
+                try {
+                    sleep(2000); //Waits 2 seconds before starting to read messages, done to ensure stopReadingMessages is taken and applied to correct thread.
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 while (true) {
                     String msg = NetworkAdapter.readMessage();
                     Log.d("wifiMe", "Message received IN PLACE SHIP ACTIVITY: " + msg);
@@ -205,9 +213,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
                         return;
                     }
                     else if(msg.contains(NetworkAdapter.STOP_READING)){
-                        //Thread.currentThread().interrupt();
                         return;
-                        //return;
                     }
                     else if (msg.startsWith(NetworkAdapter.PLACED_SHIPS)) {
                         Log.d("wifiMe", "Found board message");

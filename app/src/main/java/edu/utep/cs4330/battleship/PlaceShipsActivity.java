@@ -103,7 +103,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         if (NetworkAdapter.hasConnection()) {
             startReadingMessage();
         } else {
-            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
+//            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
         }
 
     }

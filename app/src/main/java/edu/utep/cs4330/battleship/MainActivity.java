@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +36,9 @@ public class MainActivity extends AppCompatActivity{
 
     /**Shows the status of the game, whose turn it is or if someone has won*/
     private TextView gameStatus;
+
+    /**Button to allow user to change AI difficulty, disabled when playing online*/
+    private Button opponentSelect;
 
     /**MediaPlayer used to play sound effects for shooting a ship and missing*/
     private MediaPlayer mp;
@@ -72,16 +76,19 @@ public class MainActivity extends AppCompatActivity{
         playerBoardView = (BoardView) findViewById(R.id.playerBoardView);
         strategyDescription = (TextView) findViewById(R.id.strategy_description);
         gameStatus = (TextView) findViewById(R.id.gameStatus);
+        opponentSelect = (Button) findViewById(R.id.opponentSelect);
 
         //Gives board references to the BoardViews
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
         updateTurnDisplay();
 
         if(NetworkAdapter.hasConnection()) {
+            //if there is a multiplayer game, disable the AI difficulty change setting
+            opponentSelect.setEnabled(false);
             startReadingNetworkMessages();
         }
         else{
-            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
+//            toast("No connection with opponent"); //TODO used for debugging remove before submission, or add something else to indicate not connected
         }
     }
 
@@ -106,7 +113,7 @@ public class MainActivity extends AppCompatActivity{
         opponentBoardView.setBoard(opponentBoard);
 
         playerBoardView.displayBoardsShips(true);
-        opponentBoardView.displayBoardsShips(true); //TODO REMOVE TO PREVENT CHEATING
+//        opponentBoardView.displayBoardsShips(true); //TODO REMOVE TO PREVENT CHEATING
         opponentBoardView.addBoardTouchListener(new BoardView.BoardTouchListener(){
             @Override
             public void onTouch(int x, int y){
@@ -129,6 +136,8 @@ public class MainActivity extends AppCompatActivity{
                         //Connection lost handler
                         Log.d("wifiMe", "Connection Lost!, in");
                         toast("Connection Lost! Now playing single player game against computer");
+                        //allow user to change AI difficulty again
+                        opponentSelect.setEnabled(true);
                         return;
                     }
                     else if(msg.startsWith(NetworkAdapter.PLACED_SHIPS)){
@@ -484,8 +493,9 @@ public class MainActivity extends AppCompatActivity{
                     item.setTitle(getString(R.string.enable_sound));
                 }
                 return true;
-            case R.id.place_ships:
-                Intent i = new Intent(this, PlaceShipsActivity.class);
+            case R.id.menu:
+                finish();
+                Intent i = new Intent(this, MainMenu.class);
                 startActivity(i);
             default:
                 return super.onOptionsItemSelected(item);

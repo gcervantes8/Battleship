@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         game = (GameManager) savedInstanceState.getSerializable("game");
         setNewBoards(playerBoardView, opponentBoardView, game.getPlayer().getBoard(), game.getOpponentPlayer().getBoard());
         updateTurnDisplay();
+        updateBoards();
     }
 
     @Override
@@ -142,16 +143,12 @@ public class MainActivity extends AppCompatActivity {
         updateBoards();
     }
 
+    /**Starts a new thread that will start reading for message and handle them*/
     void startReadingNetworkMessages() {
 
         Thread readMessages = new Thread(new Runnable() {
             public void run() {
-                /*try {
-                    sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
-                
+
                 while (true) {
                     String msg = NetworkAdapter.readMessage();
                     Log.d("wifiMe", "Message received: " + msg);
@@ -331,12 +328,9 @@ public class MainActivity extends AppCompatActivity {
         //Player keeps turn if they hit a ship
         else {
             game.changeTurn();
-            updateTurnDisplay();
             playSound(R.raw.miss);
         }
-
-        opponentBoardView.invalidate();
-
+        updateTurnDisplay();
         updateBoards();
         boolean playerWon = game.getOpponentPlayer().areAllShipsSunk();
 
@@ -358,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (!NetworkAdapter.hasConnection()) {
-            Log.d("wifiMe", "BROKEN - COMPUTER");
+            Log.d("wifiMe", "Computer made a play");
             boolean isComputersTurn = game.getActivePlayer() != game.getPlayer();
             if (isComputersTurn) {
                 computerTurn();
@@ -366,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**Updates the display which indicates whose turn it is*/
     public void updateTurnDisplay() {
         runOnUiThread(new Runnable() {
             @Override
@@ -383,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**Updates the display which indicates whose which player won*/
     public void updateWinDisplay(final boolean playerWon) {
         runOnUiThread(new Runnable() {
             @Override
@@ -396,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**Makes a move on the board for connected player on wifip2p (opponent p2p move)*/
     public void p2pOpponentPlay(int x, int y) {
         Place placeToHit = game.getPlayer().getBoard().placeAt(x, y);
 
@@ -550,10 +547,10 @@ public class MainActivity extends AppCompatActivity {
                 String title, description;
                 if (winner) {
                     title = getString(R.string.winner_title);
-                    description = getString(R.string.winner_description) + " " + shipsSunk + " ships";
+                    description = getString(R.string.winner_description);
                 } else {
                     title = getString(R.string.loser_title);
-                    description = getString(R.string.loser_description) + " " + shipsSunk + " ships";
+                    description = getString(R.string.loser_description);
                 }
                 alertDialog.setTitle(title);
                 alertDialog.setMessage(description);

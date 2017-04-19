@@ -14,6 +14,7 @@ import java.net.Socket;
  */
 
 public class NetworkAdapter {
+
     /**The socket that will be used for the connection, null if no connection is established*/
     private static Socket socket;
 
@@ -38,12 +39,15 @@ public class NetworkAdapter {
     /**Message constant, Sent or received when a place has been shot, message sent usually contains coordinates in the format of "PLACE SHOT 3,5"*/
     static final String PLACE_SHOT = "PLACE SHOT";
 
+    /**Message constant, Used to tell other player to stop reading messages given*/
     static final String STOP_READING = "STOP READING";
+
 
     //Methods accessed statically, prevents objects from being created to avoid confusion
     private NetworkAdapter(){}
 
-    /**Used to set sockets*/
+    /**Used to set a new socket, also initializes the printwriter and bufferedreader based on the socket
+     * so messages can be sent*/
     static void setSocket(Socket s){
         try {
             Log.d("wifiMe", "socket set, is socket null? " + (s == null));
@@ -62,6 +66,7 @@ public class NetworkAdapter {
         }
     }
 
+    /**Returns the socket being used*/
     static Socket getSocket(){
         return socket;
     }
@@ -99,6 +104,9 @@ public class NetworkAdapter {
      *
      * }
      * */
+
+    /**Reads messages  by the other player and returns them, blocks the calling thread until a message is recieved
+     * @return null if connection was lost*/
     static String readMessage(){
 
         try {
@@ -134,12 +142,12 @@ public class NetworkAdapter {
         return null;
     }
 
+    /**Given the board String representation converts it back to the original board and returns it*/
     static Board decipherPlaceShips(String opponentBoard){
         if(opponentBoard == null || !opponentBoard.startsWith(PLACED_SHIPS)){
             return null;
         }
-
-        opponentBoard = opponentBoard.substring(NetworkAdapter.PLACED_SHIPS.length()); //good
+        opponentBoard = opponentBoard.substring(NetworkAdapter.PLACED_SHIPS.length());
 
         Log.d("wifiMe", "Attempting to convert string to board, the string: " + opponentBoard);
         Board b = new Board(10);
@@ -204,45 +212,45 @@ public class NetworkAdapter {
         return coordinatesShot;
     }
 
-    /**Writes message*/
-    public static void writeMessage(String msg){
-        out.println(msg);
-        out.flush();
-    }
-
-    public static void writeBoardMessage(Board board){
+    /**Writes the board to the other player using the Board's toString method*/
+    static void writeBoardMessage(Board board){
         out.println(PLACED_SHIPS + board.toString());
         out.flush();
         Log.d("wifiMe", "Board being sent: " + board.toString());
     }
 
     /**Writes a place shot message, and places it in given coordinates*/
-    public static void writePlaceShotMessage(int x, int y){
+    static void writePlaceShotMessage(int x, int y){
         out.println(PLACE_SHOT + " " + x + "," + y);
         out.flush();//flush clears the message you just wrote
     }
 
+    /**Writes a message to other player to stop reading messages*/
     static void writeStopReadingMessage(){
         out.println(STOP_READING + " ");
         out.flush();
     }
 
+    /**Writes a message to other player to request a new game*/
     static void writeNewGameMessage(){
         out.println(NEW_GAME + " ");
         out.flush();
     }
 
+    /**Writes a message to other player to accept the new game request*/
     static void writeAcceptNewGameMessage(){
         out.println(ACCEPT_NEW_GAME_REQUEST + " ");
         out.flush();
     }
 
+    /**Writes a message to other player to reject the new game request*/
     static void writeRejectNewGameMessage(){
         out.println(REJECT_NEW_GAME_REQUEST + " ");
         out.flush();
     }
 
-    public static boolean hasConnection(){
+    /**Returns true if there is a connection with the other player*/
+    static boolean hasConnection(){
         return (socket != null);
     }
 

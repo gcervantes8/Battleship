@@ -57,7 +57,8 @@ public class PlaceShipsActivity extends AppCompatActivity {
      */
     private Board opponentBoard = null;
 
-
+    /**Boolean variable that indicates when other player has placed all of their ships and tapped the place ships button
+     * Used for connecting with opponent, so we know player is done placing ships*/
     private boolean donePlacingShips = false;
 
     private Thread readMessages;
@@ -191,6 +192,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
+    /**Creates new thread and blocks that thread, starts reading the messages and handling them appropriately*/
     void startReadingMessage() {
 
         readMessages = new Thread(new Runnable() {
@@ -295,6 +297,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         return true;
     }
 
+    /**Transitions to the MainActivity when given the GameManager*/
     public void segueToActivity(final GameManager game) {
         final PlaceShipsActivity activity = this;
         runOnUiThread(new Runnable() {
@@ -441,6 +444,8 @@ public class PlaceShipsActivity extends AppCompatActivity {
         boardView.invalidate();
     }
 
+    /**Enables the place ship button after all the ships have been placed by user, can also disable
+     * @param enable whether to enable or disable the place ship button*/
     private void enablePlaceButton(Boolean enable) {
         if (enable) {
             placeButton.setEnabled(true);
@@ -515,6 +520,7 @@ public class PlaceShipsActivity extends AppCompatActivity {
         });
     }
 
+    /**Gives a toast-message to the user*/
     private void toast(final String s) {
         final Context context = this;
         runOnUiThread(new Runnable() {

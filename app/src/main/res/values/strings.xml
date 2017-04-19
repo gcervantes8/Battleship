@@ -18,8 +18,8 @@
     <string name="rotate_ship">Rotate Ship</string>
     <string name="winner_title">Winner!</string>
     <string name="loser_title">Loser!</string>
-    <string name="winner_description">You have beaten the game by sinking all of the ships! \n\n You sunk all </string>
-    <string name="loser_description">You have lost the game, your opponent sank all your ships before you did.\n\n You sunk </string>
+    <string name="winner_description">You have beaten the game by sinking all of the ships!</string>
+    <string name="loser_description">You have lost the game, your opponent sank all your ships before you did.</string>
     <string name="player_turn_status">It is your turn </string>
     <string name="computer_turn_status">It it computer\'s turn </string>
     <string name="opponent_turn_status">It it opponent\'s turn </string>

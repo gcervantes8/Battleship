@@ -1,7 +1,6 @@
 package edu.utep.cs4330.battleship;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import static java.lang.Thread.sleep;
+
+/**
+ * Created by Gerardo Cervantes and Eric Torres.
+ */
 
 public class MainActivity extends AppCompatActivity {
 

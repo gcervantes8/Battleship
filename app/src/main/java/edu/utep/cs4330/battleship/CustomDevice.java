@@ -3,7 +3,7 @@ package edu.utep.cs4330.battleship;
 import android.net.wifi.p2p.WifiP2pDevice;
 
 /**
- * Created by Eric on 4/18/2017.
+ * Created by Gerardo Cervantes and Eric Torres on 4/18/2017.
  *
  * Wrapper class used to replace toString method of WifiP2pDevice safely.
  */

@@ -23,7 +23,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
-
+/**
+ * Created by Gerardo Cervantes modified by Eric Torres.
+ */
 public class PlaceShipsActivity extends AppCompatActivity {
 
     /**

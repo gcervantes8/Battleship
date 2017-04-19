@@ -33,6 +33,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Created by Gerardo Cervantes and Eric Torres.
+ */
 public class ConnectionActivity extends AppCompatActivity implements WifiP2pManager.PeerListListener {
 
     private final IntentFilter intentFilter = new IntentFilter();

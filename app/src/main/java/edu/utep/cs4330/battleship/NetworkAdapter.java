@@ -10,7 +10,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 /**
- * Created by Jerry C on 4/10/2017.
+ *
+ * Created by Gerardo Cervantes and Eric Torres on 4/10/2017.
  */
 
 public class NetworkAdapter {

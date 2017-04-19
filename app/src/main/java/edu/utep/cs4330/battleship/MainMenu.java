@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 /**
- * Created by Eric on 4/17/2017.
+ * Created by Gerardo Cervantes and Eric Torres on 4/17/2017.
  */
 
 public class MainMenu extends Activity {

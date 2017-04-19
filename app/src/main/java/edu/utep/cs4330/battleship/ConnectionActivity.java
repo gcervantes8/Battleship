@@ -55,7 +55,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
     /**
      * Contains spinner information
      */
-    private ArrayAdapter<WifiP2pDevice> deviceAdapter;
+    private ArrayAdapter<CustomDevice> deviceAdapter;
 
     /**
      * Receives broadcasts
@@ -66,12 +66,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
 
     final private int port = 7070;
 
-    private final WifiP2pDevice NO_DEVICES_FOUND = new WifiP2pDevice() {
-        @Override
-        public String toString() {
-            return "No devices found";
-        }
-    };
+    private final CustomDevice NO_DEVICES_FOUND = new CustomDevice(null);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +83,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
-        List<WifiP2pDevice> items = new LinkedList<>();
+        List<CustomDevice> items = new LinkedList<>();
         items.add(NO_DEVICES_FOUND);
         deviceAdapter = new ArrayAdapter<>(this, R.layout.spinner, R.id.list, items);
 
@@ -118,7 +113,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
             public void onFailure(int reasonCode) {
                 // Code for when the discovery initiation fails goes here.
                 // Alert the user that something went wrong.
-                Log.d("Connection", "Failed discovery initiation");
+                Log.d("Connection", "Failed discovery initiation, reason: "+reasonCode);
             }
         });
 
@@ -185,10 +180,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
                         });
                     }
                 } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            /*DeviceListFragment fragment = (DeviceListFragment) activity.getFragmentManager()
-                    .findFragmentById(R.id.frag_list);
-            fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
-                    WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));*/
+
                     if (mManager != null) {
                         mManager.requestPeers(mChannel, activity);
                     }
@@ -222,14 +214,15 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
             @Override
             public void run() {
 
+                CustomDevice d = (CustomDevice) deviceSpinner.getSelectedItem();
+                WifiP2pDevice deviceSelected = d.device;
 
-                WifiP2pDevice deviceSelected = (WifiP2pDevice) deviceSpinner.getSelectedItem();
-
-                if (deviceSelected == NO_DEVICES_FOUND) {
+                if (deviceSelected == NO_DEVICES_FOUND.device) {
                     toast("No device selected");
-
                     return;
                 }
+
+
                 WifiP2pConfig config = new WifiP2pConfig();
                 config.deviceAddress = deviceSelected.deviceAddress;
                 config.wps.setup = WpsInfo.PBC;
@@ -307,7 +300,7 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
         } else {
             deviceAdapter.clear();
             for (WifiP2pDevice device : peerList.getDeviceList()) {
-                deviceAdapter.add(device);
+                deviceAdapter.add(new CustomDevice(device));
             }
         }
         Log.d("wifiMe", "Devices updates");
@@ -315,6 +308,12 @@ public class ConnectionActivity extends AppCompatActivity implements WifiP2pMana
     }
 
     public void refresh(View view) {
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener(){
+            @Override
+            public void onSuccess(){ Log.d("Connection", "Successful discovery initiation");}
+            @Override
+            public void onFailure(int reasonCode){Log.d("Connection", "Failed discovery initiation, reason: "+reasonCode);}
+        });
 
         mManager.requestPeers(mChannel, this);
         toast("Refreshed!");
